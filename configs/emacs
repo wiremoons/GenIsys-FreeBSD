@@ -27,7 +27,7 @@
 ;;(typopunct-change-language 'english t)
 ;;
 ;; set font face and font size
-(set-face-font 'default "Consolas-13")
+(set-face-font 'default "Consolas-12")
 ;;
 ;; set emacs to use CUA mode
 (cua-mode t)
