@@ -1,0 +1,19 @@
+# You can view the commands in this .gitconfig file with: git config --list
+#
+#	reminder: GitHub account uses 2FA - so use specific generated password
+#	when logging in from the command line - not the GitHub password!
+#
+[core]
+	editor = nano -w
+	pager = less -r
+[user]
+	name = Simon Rowe
+	email = simon@wiremoons.com
+[color]
+	ui = true
+[alias]
+	graph = log --graph --oneline --decorate --stat
+[credential]
+	helper = cache --timeout=3600
+[push]
+	default = simple

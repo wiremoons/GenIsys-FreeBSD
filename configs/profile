@@ -1,0 +1,245 @@
+#
+#       profile file for wiremoons.com - stored in ~/MoonStore/apps/linux/configs/profile
+#
+#           to use add a symbolic link to you $HOME/.profile
+#
+#####################################################################
+#
+#   below are standard .profile setup from a FreeBSD distribution
+#
+#####################################################################
+# If not running interactively, don't do anything
+# $FreeBSD: releng/10.1/share/skel/dot.profile 266029 2014-05-14 15:23:06Z bdrewery $
+#
+# .profile - Bourne Shell startup script for login shells
+#
+# see also sh(1), environ(7).
+#
+# These are normally set through /etc/login.conf.  You may override them here
+# if wanted.
+# PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/games:/usr/local/sbin:/usr/local/bin:$HOME/bin; export PATH
+# BLOCKSIZE=K;	export BLOCKSIZE
+#
+# Setting TERM is normally done through /etc/ttys.  Do only override
+# if you're sure that you'll never log in via telnet or xterm or a
+# serial line.
+# TERM=xterm; 	export TERM
+#
+# Set $EDITOR to either vi or Emacs
+EDITOR=emacs;  	export EDITOR
+# set $PAGER to either more or less
+PAGER=more;  	export PAGER
+#
+# set LANG and CHARSET
+LANG=en_GB.UTF-8;     export LANG
+CHARSET=UTF-8;        export CHARSET
+GDM_LANG=en_GB.UTF-8; export GDM_LANG
+
+#
+# set ENV to a file invoked each time sh is started for interactive use.
+#ENV=$HOME/.shrc; export ENV
+
+#case $- in
+#    *i*) ;;
+#      *) return;;
+#esac
+#
+# set HISTORY requirements: file location and size
+HISTFILE=~/.mksh-history
+HISTSIZE=5000
+#
+# set options for mksh - use set -o to show current settings
+# set UTF-8 mode
+set -U
+# add trailing '/' to directory names
+set -X
+# use Emacs mode
+set -o emacs
+# make a login shell
+#set -l
+# set variable identifying the chroot you work in (used in the prompt below)
+if [ -z "${chroot_env:-}" ] && [ -r /etc/chroot_env ]; then
+    chroot_env=$(cat /etc/chroot_env)
+fi
+#
+# control if colour prompt below is used - have different colour for different computers
+# for more colour codes: https://wiki.archlinux.org/index.php/Color_Bash_Prompt
+#  \e[00m == text ; \e[30m == black ; \e[32m == green ; \e[34m == blue ; \e[35m == purple ; \e[36m == cyan ; 
+export color_prompt=yes
+# get out current hostname for use below - to manage prompt colours for different systems
+export HOSTNAME=`hostname`
+# set the prompt - with different color for the 'user@host' element of the prompt
+#  if colour prompt - set different one for each host 
+if [ "$color_prompt" = yes ]; then
+  if [ $HOSTNAME == blumoons ] ; then
+      # green prompt
+      PS1=$'\e[32m$USER@$(uname -n):\e[34m${PWD##/*/}\e[00m $ '
+  fi
+  if [ $HOSTNAME == server ] ; then
+      # cyan prompt
+      PS1=$'\e[36m$USER@$(uname -n):\e[34m${PWD##/*/}\e[00m $ '
+  fi
+  if [ $HOSTNAME == ultramoons ] ; then
+      # purple prompt
+      PS1=$'\e[35m$USER@$(uname -n):\e[34m${PWD##/*/}\e[00m $ '
+  fi
+else
+    PS1=$'$USER@$(uname -n):${PWD##/*/}$ '
+fi
+
+#-----------------------------------------------------------------------------
+#    SETUP env variable $TOOLDIR to point to local scripts held in MoonStore
+#-----------------------------------------------------------------------------
+# Create ${TOOLDIR} env variable to store location for bin & scripts folder 
+# - only if it exists
+if [ -d /home/simon/MoonStore/apps/freebsd/bin ] ; then
+  TOOLDIR=/home/simon/MoonStore/apps/freebsd/bin
+fi
+export TOOLDIR
+
+#-----------------------------------------------------------------------------
+#    SETUP $PATH to include local apps and scripts held in MoonStore
+#-----------------------------------------------------------------------------
+# update PATH to include MoonStore Unix bin & scripts folder if it exists
+if [ -d ~/MoonStore/apps/freebsd/bin ] ; then
+  PATH=~/MoonStore/apps/freebsd/bin:"${PATH}"
+fi
+export PATH
+
+#-----------------------------------------------------------------------------
+#    SETUP GOLANG  ~/MoonStore/apps/freebsd/go-bsd  ~/MoonStore/Development-Code/Go
+#-----------------------------------------------------------------------------
+# Add Go Language $GOPATH to the ~/MoonStore Go code library - if directory exists and 
+# the env variable does not already contain the info
+if [ -d ~/MoonStore/Development-Code/Go ] ; then
+  # check the GOPATH is not already included from elsewhere?
+  if [ -z $GOPATH ] ; then
+    # OK - we are good to set it!
+    GOPATH=~/MoonStore/Development-Code/Go:"${GOPATH}"
+  fi
+fi
+export GOPATH
+
+# Add Go Language $GOROOT to the ~/MoonStore Go distribution location
+if [ -d ~/MoonStore/apps/freebsd/go-bsd ] ; then
+  GOROOT=~/MoonStore/apps/freebsd/go-bsd
+fi
+export GOROOT
+
+# update PATH to include the Go distribution 'bin' directory if exists
+if [ -d ~/MoonStore/apps/freebsd/go-bsd/bin ] ; then
+  PATH=~/MoonStore/apps/freebsd/go-bsd/bin:"${PATH}"
+fi
+export PATH
+
+#-----------------------------------------------------------------------------
+#    SETUP OTHER ENVIRONMENT VARIABLES
+#-----------------------------------------------------------------------------
+
+# Add $ACRODB to the Sybil.db database location used by acrotool application
+if [ -d /datastore/Work/Scratch/Sybil ] ; then
+  # set for 'server'
+  ACRODB=/datastore/Work/Scratch/Sybil/Sybil.db
+fi
+if [ -d /datastore/Work/Scratch/Sybil ] ; then
+  # set for 'blumoons'
+  ACRODB=/datastore/Work/Scratch/Sybil/Sybil.db
+fi
+export ACRODB
+
+#-----------------------------------------------------------------------------
+#    SETUP SKYPE - improves jitter and speak quality
+#-----------------------------------------------------------------------------
+export PULSE_LATENCY_MSEC=60
+
+if [ -d ~/MoonStore/apps/freebsd/Unison  ] ; then
+  UNISON=~/MoonStore/apps/freebsd/Unison
+fi
+export UNISON
+
+#-----------------------------------------------------------------------------
+#    SETUP Google Cloud services scripts
+#-----------------------------------------------------------------------------
+# The next line updates PATH for the Google Cloud SDK.
+#source '/datastore/SyncData/Downloads/Linux/GoogleCloudSDK/google-cloud-sdk/path.bash.inc'
+
+# The next line enables bash completion for gcloud.
+#source '/datastore/SyncData/Downloads/Linux/GoogleCloudSDK/google-cloud-sdk/completion.bash.inc'
+
+
+#-----------------------------------------------------------------------------
+#    SETUP Git
+#-----------------------------------------------------------------------------
+
+# Add bash tab completion for git commands (see earlier above for setting normal bash completions)
+#
+# if you see the error: "/usr/bin/gitk: line 3: exec: wish: not found." - comment out below
+#
+# set for 'Ubuntu' - if exists
+if [ -d /usr/share/bash-completion/completions/ ] && [ -f /usr/share/bash-completion/completions/git ] ; then
+    source /usr/share/bash-completion/completions/git
+fi
+# set for 'arch linux'
+if [ -d /usr/share/git/completion/ ] && [ -f /usr/share/git/completion/git-completion.bash ] ; then
+    source /usr/share/git/completion/git-completion.bash
+fi
+
+# check if git is installed - and if it is set up some env etc
+# NB: change path for other systems '/usr/bin/git' is fine for Ubuntu and Arch Linux :
+if [ -f /usr/bin/git ] ; then
+  # set the default config editor for git to be nano
+  git config --global core.editor "nano -w"
+  # set the git name and email to use for this account
+  git config --global user.name "Simon Rowe"
+  git config --global user.email "simon@wiremoons.com"
+  # set git to use a colour command prompt
+  git config --global color.ui true
+  # configure git to use email with 'msmtp' - you will need to install & configure
+  #git config --global sendemail.smtpserver /usr/local/bin/msmtp
+  # add a more useful 'git graph' alias to show details of repository
+  git config --global alias.graph 'log --graph --oneline --decorate --stat'
+fi
+
+
+#-----------------------------------------------------------------------------
+#    SETUP aliases
+#-----------------------------------------------------------------------------
+#
+# Set some useful aliases below
+#
+# alter ls output
+alias ls='ls -CFG'
+alias ll='ls -lG'
+alias la='ls -laG'
+#
+# useful aliases for small tools
+alias clean='rm *~ .*~ 2> /dev/null'
+alias vcheck='clamscan -r -i --bell .'
+alias dthumbs='find . -name "Thumbs.db" -print -exec rm -rf {} \;'
+#
+# jump to directory locations
+alias gdbs='cd ~/Work/Revenue-Assurance/LIJ-Project/Databases/'
+alias gdev='cd ~/MoonStore/Development-Code/'
+alias goc='cd ~/MoonStore/Development-Code/c-code/'
+alias glib='cd ~/MoonStore/Sybil-Library/Technical-Info'
+alias ggo='cd ~/MoonStore/Development-Code/Go/src/github.com/wiremoons'
+alias gtd='cd ${TOOLDIR}'
+alias gweb='cd ~/MoonStore/Development-Code/WebSites'
+alias handbrake="HandBrake"
+#
+# run scripts in MoonStore
+alias ds='${TOOLDIR}/doc-search'
+alias tcl='/usr/bin/rlwrap ${TOOLDIR}/tclsh'
+alias conwin='${TOOLDIR}/con-win'
+alias conwork='${TOOLDIR}/con-work'
+#
+#  run commandline tools with define parameters
+alias shownet='sudo netstat -tuape | grep -v tcp6 | grep -v udp6'
+alias emacs='emacs -nw'
+alias ubuntu-ver='lsb_release -a'
+alias chk-ssh='zgrep ssh /var/log/auth.log* | grep -i failed'
+alias vncserver="ssh -t -L 5900:localhost:5900 server.local 'x11vnc -localhost -display :0'"
+alias qcon='telnet localhost 3010'
+alias iotop='sudo iotop -Pao'
+alias tst='ssh -L 8090:127.0.0.1:8080 server.local'
+alias restart-conky='killall -SIGUSR1 conky'

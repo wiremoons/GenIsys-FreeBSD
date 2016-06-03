@@ -1,0 +1,154 @@
+;;  Emacs Configuration file for wiremoons
+;;
+;;    Originally Created:  8th Jan 2012
+;;    Last Updated: 08 Jan 2012
+;;    Updated on 22 Feb 2014
+;;    Updated on 15 May 2014 - added golang support
+;;    Updated on 09 Dec 2014 - minor corrections
+;;    Updated on 28 Dec 2014 - added UFT-8 support
+;;    Updated on 21 Jan 2015 - added c language support, yasnippit, auto-complete
+;;    Updated on 09 Jan 2016 - added text mode improvements for bullet handling
+;;    Updated on 03 Jun 2016 - added CUA mode setting
+;;
+;;  NB:  you can reload this file once editied with:
+;;     M-x load-file RET RET
+;;  
+;;
+;; Load a colour scheme
+;;(load-theme 'tsdh-dark)
+(load-theme 'tsdh-light)
+;;
+;; set default languange and use typopunct-mode to be able to use
+;; typographical quotes and em-dash etc
+;; can use M-x typopunct-mode to change
+;; Type ‘C-q "’ and ‘C-q '’ to insert literal ASCII double and single
+;; if neeed to overide this mode.
+;;(require 'typopunct)
+;;(typopunct-change-language 'english t)
+;;
+;; set font face and font size
+(set-face-font 'default "Consolas-13")
+;;
+;; set emacs to use CUA mode
+(cua-mode t)
+(setq cua-auto-tabify-rectangles nil) ;; Don't tabify after rectangle commands
+(transient-mark-mode 1) ;; No region when it is not highlighted
+(setq cua-keep-region-after-copy t) ;; Standard Windows behaviour
+;;
+;; Add the characters - + or * as bullet points in text so they are recognised as
+;; paragraph boundaries also, and therefore M-q respects their formating.
+;; The original value is "\f\\|[      ]*$", so we add the bullets (-), (+), and (*).
+;; There is no need for "^" as the regexp is matched at the beginning of line.
+(setq paragraph-start "\f\\|[ \t]*$\\|[ \t]*[-+*] ")
+;;
+;; Don't use the double spaces to denote the end of a sentance - as used by
+;; American typists.
+(setq sentence-end-double-space nil)
+;;
+;; tell Emacs to use Aspell instead of default ispell
+;; make sure it is installed with: sudo pacman -S aspell aspell-en
+(setq-default ispell-program-name "aspell")
+;;
+;; spell check as you type using `flyspell-mode'
+;; for all documents use flyspell-mode uncomment below:
+;;(setq-default flyspell-mode t)
+;; or just use flyspell-mode for these doucment types:
+(dolist (hook '(text-mode-hook))
+      (add-hook hook (lambda () (flyspell-mode 1))))
+(dolist (hook '(change-log-mode-hook log-edit-mode-hook))
+      (add-hook hook (lambda () (flyspell-mode -1))))
+;;
+;; enable abbrev mode and specify the file to keep, and save on exit
+(setq-default abbrev-mode t)
+(read-abbrev-file "~/.abbrev_defs")
+(setq save-abbrevs t)
+;;
+;; Use ido-mode for buffer management - use C-x b to access
+(ido-mode t)
+;;
+;; don't make pesky backup files
+(setq make-backup-files nil)
+;;
+;; add key bindings
+;; used to insert text into defined rectangle:
+(global-set-key (kbd "C-x r i") 'string-insert-rectangle)
+;; bind key to start iedit mode - as is broken by default
+(define-key global-map (kbd "C-c ;") 'iedit-mode)
+;;
+;; dont insert tabs - use spaces instead
+(setq-default indent-tabs-mode nil)
+;; set tabs to four space and the tab stops to use
+(setq tab-width 4)
+(setq tab-stop-list '(4 8 12 16 20 24 28 32 36 40 44 48 52 56 60 64 68 72 76 80))
+;; highlight region between point and mark and make the region visible (up to the next operation on it)
+(transient-mark-mode t)
+;;
+;; highlight during query
+(setq query-replace-highlight t)        
+;; highlight incremental search
+(setq search-highlight t)               
+;;
+;; Show matching parenthesis. How can you live without it.
+(show-paren-mode t)
+;; Don't add new lines to the end of a file when using down-arrow key
+(setq next-line-add-newlines nil)
+;; show line numbers in files and add space between number and file's text / content
+(global-linum-mode t)
+(setq linum-format "%d ")
+;; Open unidentified files in text mode - as the default
+(setq default-major-mode 'text-mode)
+;; Always prefer UTF-8 support
+(prefer-coding-system 'utf-8)
+;;
+;; Emacs Packaging
+;; load the package management
+(require 'package)
+;; Add addtional repositories for package management
+(setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
+                         ("marmalade" . "https://marmalade-repo.org/packages/")
+                         ("melpa" . "http://melpa.milkbox.net/packages/")))
+;; ensures the installed packages in ~/.emacs.d/elpa/ are all loaded for Emacs
+(package-initialize)
+;;
+;; c Source Code
+;; setup for c source code
+;;
+;; make sure c mode is enabled for .h .c or .cpp files
+(require 'cc-mode)
+;; change from 'GNU' default style to 'linux' - to remove brace indentation
+(setq c-default-style "linux" c-basic-offset 4)
+;; set indentation level to 4
+(setq-default tab-width 4 indent-tabs-mode t)
+;; auto indent code when return is pressed 
+(define-key c-mode-base-map (kbd "RET") 'newline-and-indent)
+;; turn on automatic bracket insertion by pairs. New in Emacs 24
+(electric-pair-mode 1)
+;; enable auto-complete for source code file - below is generic for all languages
+(require 'auto-complete)
+(require 'auto-complete-config)
+(ac-config-default)
+;; add yasnippet support for all languages, and enable it
+(require 'yasnippet)
+(yas-global-mode 1)
+;; define a function to load auto-complete-c-header called on c hooks being started
+(defun my:ac-c-header-init ()
+  (require 'auto-complete-c-headers)
+  (add-to-list 'ac-sources 'ac-source-c-headers))
+(add-hook 'c-mode-hook 'my:ac-c-header-init)
+;; enable flymake for syntax checking - require below in your Makefile:
+;; check-syntax:
+;;     gcc -o nul -S ${CHK_SOURCES}
+;; to use `M-x flymake` or add "(add-hook 'find-file-hook 'flymake-find-file-hook)"
+(require 'flymake)
+;;
+;; GO LANG
+;; provide support for Go language: M-x list-packages 
+;;(require 'go-mode-load)
+(add-hook 'go-mode-hook (lambda ()
+                          'before-save-hook 'gofmt-before-save))
+(add-hook 'go-mode-hook (lambda ()
+          (local-set-key (kbd "C-c C-r") 'go-remove-unused-imports)))
+(if (not (string-match "go" compile-command))
+      (set (make-local-variable 'compile-command)
+           "go build -v && go test -v && go vet"))
+
