@@ -1,0 +1,69 @@
+#!/bin/sh
+#
+#  ipfw (Internet Packet Firewall) rules configuration file for:
+#		server
+#
+#    created 05 June 2016 by Simon Rowe
+#
+#
+############### start of ipfw rules script for server #############
+#
+ipfw -q -f flush       # Delete all existing rules
+# Set defaults
+if1="em0"              # server network interface card
+cmd="ipfw -q add "     # build rule prefix
+# add actual rules below using above defaults as shorthand
+$cmd 00010 allow all from any to any via lo0
+$cmd 00500 check-state
+$cmd 00502 deny all from any to any frag
+$cmd 00501 deny tcp from any to any established
+# allow web browsing out
+$cmd 00600 allow tcp from any to any 80 out via $if1 setup keep-state 
+$cmd 00601 allow tcp from any to any 443 out via $if1 setup keep-state
+# allow dns lookup to specified dns servers
+$cmd 00610 allow tcp from any to 8.8.8.8 53 out via $if1 setup keep-state
+$cmd 00610 allow tcp from any to 8.8.4.4 53 out via $if1 setup keep-state
+$cmd 00611 allow udp from any to 8.8.8.8 53 out via $if1 keep-state
+$cmd 00611 allow udp from any to 8.8.4.4 53 out via $if1 keep-state
+# allow dhcp request - but log them
+$cmd 00620 allow log udp from any to any 67 via $if1 keep-state
+$cmd 00622 allow log udp from any to any 68 via $if1 keep-state
+# allow ping in and out
+$cmd 00700 allow icmp from any to any via $if1 keep-state
+$cmd 00705 allow icmp from any to any in via $if1 keep-state
+# allow traceroute out
+$cmd 00710 allow udp from me to any 33434-33525 out via $if1 keep-state
+$cmd 00711 allow udp from any to any 33434-33525 in via $if1 keep-state
+# allow syncthing in and out
+$cmd 00720 allow tcp from any to any 22000 via $if1 setup keep-state
+$cmd 00721 allow udp from any to any 21027 via $if1 keep-state
+# allow outgoing email connections
+$cmd 00730 allow tcp from any to any 25 out via $if1 setup keep-state
+$cmd 00731 allow tcp from any to any 110 out via $if1 setup keep-state
+$cmd 00732 allow tcp from any to any 587 out via $if1 setup keep-state
+# allow outgoing timeserver and NTP connections
+$cmd 00745 allow tcp from any to any 37 out via $if1 setup keep-state
+$cmd 00746 allow udp from any to any 37 out via $if1 keep-state
+$cmd 00747 allow tcp from any to any 123 out via $if1 setup keep-state
+$cmd 00748 allow udp from any to any 123 out via $if1 keep-state
+# allow avahi daemon for Bonjour and mDNS services
+$cmd 00750 allow udp from any to any 5353 keep-state
+$cmd 00751 allow ip from any to 224.0.0.251 out via $if1 keep-state
+# allow windows shares used by Samba server
+$cmd 00760 allow tcp from 10.0.10.0/24 to any 81,137,138,139,445 in setup keep-state
+$cmd 00761 allow tcp from any to 10.0.10.0/24 81,137,138,139,445 out setup keep-state
+$cmd 00762 pass udp from 10.0.10.0/24 to any 81,137,138,139 in keep-state
+$cmd 00762 pass udp from any to 10.0.10.0/24 81,137,138,139 out keep-state
+# apply sshguard rules that block blacklisted hosts in table 22
+$cmd 00775 deny ip from table\(22\) to any
+# allow outgoing SSH connections
+$cmd 00780 allow tcp from any to any 22 out via $if1 setup keep-state
+# allow incoming ssh that are not blocked by sshguard
+$cmd 00785 allow tcp from any to me dst-port 22 in via $if1 setup limit src-addr 2
+# deny and log all other outbound connections
+$cmd 01000 deny log all from any to any out via $if1
+# Reject and log all other incoming connections
+$cmd 02000 deny log all from any to any in via $if1
+# Everything else is denied and logged
+$cmd 09999 deny log all from any to any
+################### End of example ipfw rules script ############
