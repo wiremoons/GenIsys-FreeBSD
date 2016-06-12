@@ -1,0 +1,1 @@
+exec chrome --noerrdialogs --window-size=1680,1050 --window-position=0,0
