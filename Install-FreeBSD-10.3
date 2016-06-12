@@ -88,7 +88,7 @@ if [ $REPLY == y ] || [ $REPLY == Y ] ; then
 	#
 	# configure the new system settings
 	#
-	# set 'nvidia_load="YES" in '/boot/loader.conf'
+	# set 'nvidia_load="YES"' in '/boot/loader.conf'  kern.vty=vt
 	sysrc -f /boot/loader.conf nvidia_load=YES
 	if [ "nvidia_load=\"YES\"" == $(sysrc -e -f /boot/loader.conf nvidia_load) ] ; then
 		printf "'nvidia_load' set\n"
@@ -117,7 +117,7 @@ if [ $REPLY == y ] || [ $REPLY == Y ] ; then
 	# set 'dbus_enable="YES" in '/etc/rc.conf'
 	sysrc -f /etc/rc.conf dbus_enable=YES
 	if [ "dbus_enable=\"YES\"" == $(sysrc -e -f /etc/rc.conf dbus_enable) ] ; then
-		printf "'slim_enable' set\n"
+		printf "'dbus_enable' set\n"
 	else
 		printf "ERROR: should match: dbus_enable=\"YES\" == %s\n" \
 			$(sysrc -e -f /etc/rc.conf dbus_enable)
@@ -130,11 +130,55 @@ if [ $REPLY == y ] || [ $REPLY == Y ] ; then
 	nvidia-xconfig
 	nvidia-xconfig --add-argb-glx-visuals
 	nvidia-xconfig --composite
+	#
+	#  TODO
+	#  copy from config dir the xinitrc to ~/.xinitrc so i3 starts with compton etc 
+fi
+#
+# install 'server' xwindows minimal setup to use Chromium web browser
+#
+printf "\n\nINSTALL XWINDOWS SYSTEMS AND DRIVERS - 'SERVER'\n\n"
+printf "\nInstalling Frame Buffer graphics card drivers and Chromium...\n"
+read -p "Do you want to install these items y/n " -t 10 -re REPLY
+if [ $REPLY == y ] || [ $REPLY == Y ] ; then
+	pkg install xf86-video-scfb chromium xorg xdm
+	sleep 2
+	#
+	# configure the new system settings
+	#
+	# TODO
+	# set 'xinitirc-server' from config files to .xinitrc so startx runs chromium in full screen
+	#if [ "nvidia_load=\"YES\"" == $(sysrc -e -f /boot/loader.conf nvidia_load) ] ; then
+	#	printf "'nvidia_load' set\n"
+	#else
+	#	printf "ERROR: should match: nvidia_load=\"YES\" == %s\n" $(sysrc -e -f /boot/loader.conf nvidia_load)
+	#fi	
+	#
+	#  TODO
+	# add the following to: '/usr/local/etc/X11/xorg.conf.d/driver-scfb.conf
+	#  copy of file 'driver-scfb.conf' is in config dir - so copy into place??
+	#
+	# set 'hald_enable="YES" in '/etc/rc.conf' - used to auto detect hardware 
+	# changes for Xwindows - so not sure if actually required in this setup...
+	sysrc -f /etc/rc.conf hald_enable=YES
+	if [ "hald_enable=\"YES\"" == $(sysrc -e -f /etc/rc.conf hald_enable) ] ; then
+		printf "'hald_enable' set\n"
+	else
+		printf "ERROR: should match: hald_enable=\"YES\" == %s\n" $(sysrc -e -f /etc/rc.conf hald_enable)
+	fi
+	# set 'dbus_enable="YES" in '/etc/rc.conf'
+	sysrc -f /etc/rc.conf dbus_enable=YES
+	if [ "dbus_enable=\"YES\"" == $(sysrc -e -f /etc/rc.conf dbus_enable) ] ; then
+		printf "'dbus_enable' set\n"
+	else
+		printf "ERROR: should match: dbus_enable=\"YES\" == %s\n" $(sysrc -e -f /etc/rc.conf dbus_enable)
+	fi
 fi
 #
 # install updates to configuration files
 #
 printf "\n\nUPDATE SYSTEM CONFIGURATION FILES\n\n"
+#
 # check for 'kern.ipc.shm_allow_removed=1' in '/etc/sysctl.conf'
 if [ $(grep -ic "kern.ipc.shm_allow_removed=1" /etc/sysctl.conf ) -gt 0 ] ; then
 	printf "\nFile: /etc/sysctl.conf has 'kern.ipc.shm_allow_removed=1' entry already...    SKIPPING\n"
@@ -143,6 +187,7 @@ else
 	printf "kern.ipc.shm_allow_removed=1\n" >> /etc/sysctl.conf
 	printf "DONE\n"
 fi
+#
 # check for 'vfs.zfs.min_auto_ashift=12' in '/etc/sysctl.conf'
 if [ $(grep -ic "vfs.zfs.min_auto_ashift=12" /etc/sysctl.conf ) -gt 0 ] ; then
 	printf "\nFile: /etc/sysctl.conf has 'vfs.zfs.min_auto_ashift=12' entry already...    SKIPPING\n"
@@ -161,6 +206,15 @@ else
 		$(sysrc -e -f /etc/rc.conf avahi_daemon_enable)
 fi
 #
+# set 'kern.vty=vt' in '/boot/loader.conf'  
+if [ $(grep -ic "kern.vty=vt" /boot/loader.conf ) -gt 0 ] ; then
+	printf "\nFile: /boot/loader.conf has 'kern.vty=vt' entry already...    SKIPPING\n"
+else
+	printf "\nNo 'kern.vty=vt' entry found - adding to /boot/loader.conf... "
+	printf "kern.vty=vt\n" >> /boot/loader.conf
+	printf "DONE\n"
+fi
+#
 # install
 #
 printf "Manual items to edit\n"
@@ -170,6 +224,7 @@ if [ ! $(grep -ic "files mdns dns" /etc/nsswitch.conf ) -gt 0 ] ; then
 else
 	printf "\nedit '/etc/nsswitch.conf' --> change 'hosts: files dns'  to  'hosts: files mdns dns'\n"
 fi
+#
 # todo: add /etc/ssh/sshd_conf - root login permit and issue.net banner
 # server - add dhcpd config and daemon
 # server - add sshguard with
@@ -195,13 +250,14 @@ fi
 # Check and then install the firewall if required by the user
 read -p "Do you want to configure and use the IPFW FreeBSD firewall  y/n " -t 10s -re REPLY
 if [ $REPLY == y ] || [ $REPLY == Y ] ; then
-	#zfs snapshot -r zroot@FreshInstall-$(date +%Y%b%d_%H%M%S)
-	#zfs snapshot -r bootpool@FreshInstall-$(date +%Y%b%d_%H%M%S)
-	printf "ZFS snapshots created - snapshots on the file systems are:\n"
-	#zfs list -t snapshot
-	printf "\nDONE\n"
+        #zfs snapshot -r zroot@FreshInstall-$(date +%Y%b%d_%H%M%S)
+        #zfs snapshot -r bootpool@FreshInstall-$(date +%Y%b%d_%H%M%S)
+        printf "ZFS snapshots created - snapshots on the file systems are:\n"
+        #zfs list -t snapshot
+        printf "\nDONE\n"
 else
-	printf "\nNo ZFS snapshots created at user's request\n"
+        printf "\nNo ZFS snapshots created at user's request\n"
 fi
 sleep 2
+
 
