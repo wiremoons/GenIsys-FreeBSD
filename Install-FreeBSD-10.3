@@ -24,13 +24,11 @@ printf "Suggested commands to run to snapshot your boot and system areas are:\n\
 printf "    zfs snapshot -r zroot@FreshInstall-$(date +%Y%b%d_%H%M%S)\n"
 printf "    zfs snapshot -r bootpool@FreshInstall-$(date +%Y%b%d_%H%M%S)\n"
 printf "\n"
-# -n 1 - not supported ?
-#read -p "Do you want to create the suggest snapshots? " -n 1 -r
-read -p "Do you want to create the suggest snapshots y/n " -t 10s -re REPLY
 #
-# TODO: check for pools and only snapshot if they exist
+# TODO: check for pools and then only do snapshot if they exist
 # TODO: make sure ZFS is being used before trying to snapshot
 #
+read -p "Do you want to create the suggest snapshots y/n " -t 10s -re REPLY
 if [ $REPLY == y ] || [ $REPLY == Y ] ; then
 	zfs snapshot -r zroot@FreshInstall-$(date +%Y%b%d_%H%M%S)
 	zfs snapshot -r bootpool@FreshInstall-$(date +%Y%b%d_%H%M%S)
@@ -75,17 +73,17 @@ freebsd-update install
 printf "\n\nINSTALL NEW COMMAND LINE SOFTWARE\n\n"
 printf "\nInstalling new command line tools...\n"
 pkg install sudo mksh nano avahi nss_mdns git curl rsync screen \
-cmdwatch mp4v2 tree pv vim beadm aspell en-aspell
+cmdwatch vim mp4v2 tree pv beadm aspell en-aspell p7zip
 sleep 2
 #
-# install XWindows and Mate desktop manager with Nvidia drivers
+# install XWindows with Nvidia drivers
 #
-printf "\n\nINSTALL XWINDOWS SYSTEMS AND DRIVERS - 'DESKTOP'\n\n"
-printf "\nInstalling Nvidia graphics card drivers, i3, and SLIM...\n"
+printf "\n\nINSTALL XWINDOWS SYSTEMS AND DRIVERS\n\n"
+printf "\nInstalling Nvidia graphics card drivers and XWindows Desktop...\n"
 read -p "Do you want to install these items y/n " -t 10 -re REPLY
 if [ $REPLY == y ] || [ $REPLY == Y ] ; then
 	pkg install nvidia-driver nvidia-xconfig nvidia-settings chromium \
-	vlc i3 i3lock i3status compton slim xorg
+	vlc i3 i3lock i3status compton slim xorg 
 	sleep 2
 	#
 	# configure the new system settings
@@ -95,7 +93,8 @@ if [ $REPLY == y ] || [ $REPLY == Y ] ; then
 	if [ "nvidia_load=\"YES\"" == $(sysrc -e -f /boot/loader.conf nvidia_load) ] ; then
 		printf "'nvidia_load' set\n"
 	else
-		printf "ERROR: should match: nvidia_load=\"YES\" == %s\n" $(sysrc -e -f /boot/loader.conf nvidia_load)
+		printf "ERROR: should match: nvidia_load=\"YES\" == %s\n" \
+			$(sysrc -e -f /boot/loader.conf nvidia_load)
 	fi	
 	#
 	# set 'hald_enable="YES" in '/etc/rc.conf'
@@ -103,7 +102,8 @@ if [ $REPLY == y ] || [ $REPLY == Y ] ; then
 	if [ "hald_enable=\"YES\"" == $(sysrc -e -f /etc/rc.conf hald_enable) ] ; then
 		printf "'hald_enable' set\n"
 	else
-		printf "ERROR: should match: hald_enable=\"YES\" == %s\n" $(sysrc -e -f /etc/rc.conf hald_enable)
+		printf "ERROR: should match: hald_enable=\"YES\" == %s\n" \
+			$(sysrc -e -f /etc/rc.conf hald_enable)
 	fi
 	#
 	# set 'slim_enable="YES" in '/etc/rc.conf'
@@ -111,14 +111,16 @@ if [ $REPLY == y ] || [ $REPLY == Y ] ; then
 	if [ "slim_enable=\"YES\"" == $(sysrc -e -f /etc/rc.conf slim_enable) ] ; then
 		printf "'slim_enable' set\n"
 	else
-		printf "ERROR: should match: slim_enable=\"YES\" == %s\n" $(sysrc -e -f /etc/rc.conf slim_enable)
+		printf "ERROR: should match: slim_enable=\"YES\" == %s\n" \
+			$(sysrc -e -f /etc/rc.conf slim_enable)
 	fi
 	# set 'dbus_enable="YES" in '/etc/rc.conf'
 	sysrc -f /etc/rc.conf dbus_enable=YES
 	if [ "dbus_enable=\"YES\"" == $(sysrc -e -f /etc/rc.conf dbus_enable) ] ; then
 		printf "'dbus_enable' set\n"
 	else
-		printf "ERROR: should match: dbus_enable=\"YES\" == %s\n" $(sysrc -e -f /etc/rc.conf dbus_enable)
+		printf "ERROR: should match: dbus_enable=\"YES\" == %s\n" \
+			$(sysrc -e -f /etc/rc.conf dbus_enable)
 	fi
 	#
 	# FreeBSD Handbook states this may not load correctly - but may load adaquatly
@@ -200,7 +202,8 @@ sysrc -f /etc/rc.conf avahi_daemon_enable=YES
 if [ "avahi_daemon_enable=\"YES\"" == $(sysrc -e -f /etc/rc.conf avahi_daemon_enable) ] ; then
 	printf "'avahi_daemon_enable' set\n"
 else
-	printf "ERROR: should match: avahi_daemon_enable=\"YES\" == %s\n" $(sysrc -e -f /etc/rc.conf avahi_daemon_enable)
+	printf "ERROR: should match: avahi_daemon_enable=\"YES\" == %s\n" \
+		$(sysrc -e -f /etc/rc.conf avahi_daemon_enable)
 fi
 #
 # set 'kern.vty=vt' in '/boot/loader.conf'  
@@ -216,7 +219,9 @@ fi
 #
 printf "Manual items to edit\n"
 # check if need to add setting in support of package 'nss_mdns'
-if [ ! $(grep -ic "files mdns dns" /etc/nsswitch.conf ) -gt 0 ] ; then printf "ok\n" ; fi
+if [ ! $(grep -ic "files mdns dns" /etc/nsswitch.conf ) -gt 0 ] ; then 
+	printf "file '/etc/nsnswitch has 'mdns' ...    SKIPPING\n"
+else
 	printf "\nedit '/etc/nsswitch.conf' --> change 'hosts: files dns'  to  'hosts: files mdns dns'\n"
 fi
 #

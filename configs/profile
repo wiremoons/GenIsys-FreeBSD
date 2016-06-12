@@ -152,6 +152,9 @@ export ACRODB
 #-----------------------------------------------------------------------------
 export PULSE_LATENCY_MSEC=60
 
+#-----------------------------------------------------------------------------
+#    SETUP Unison - for file synchronisation and copying
+#-----------------------------------------------------------------------------
 if [ -d ~/MoonStore/apps/freebsd/Unison  ] ; then
   UNISON=~/MoonStore/apps/freebsd/Unison
 fi
@@ -171,7 +174,7 @@ export UNISON
 #    SETUP Git
 #-----------------------------------------------------------------------------
 
-# Add bash tab completion for git commands (see earlier above for setting normal bash completions)
+# Add tab completion for git commands (see earlier above for setting normal completions)
 #
 # if you see the error: "/usr/bin/gitk: line 3: exec: wish: not found." - comment out below
 #
@@ -179,14 +182,24 @@ export UNISON
 if [ -d /usr/share/bash-completion/completions/ ] && [ -f /usr/share/bash-completion/completions/git ] ; then
     source /usr/share/bash-completion/completions/git
 fi
+# /usr/local/share/git-core/contrib/completion/git-completion.bash
 # set for 'arch linux'
 if [ -d /usr/share/git/completion/ ] && [ -f /usr/share/git/completion/git-completion.bash ] ; then
     source /usr/share/git/completion/git-completion.bash
 fi
+# set for  FreeBSD with bash shell:
+if [ -d  /usr/local/share/git-core/contrib/completion/ ] && [ $SHELL == /usr/local/bin/bash ] ; then
+    source /usr/local/share/git-core/contrib/completion/git-completion.bash
+fi
+# set up for FreeBSD with mksh shell:
+#if [ -d  /usr/local/share/git-core/contrib/completion/] && [ $SHELL == /usr/local/bin/mksh ] ; then
+#    source /usr/local/share/git-core/contrib/completion/git-completion.sh
+#fi
 
-# check if git is installed - and if it is set up some env etc
-# NB: change path for other systems '/usr/bin/git' is fine for Ubuntu and Arch Linux :
-if [ -f /usr/bin/git ] ; then
+# check if git is installed - and if '~/.gitconfig' exist set up some basic env etc
+# NB: change path for other systems '/usr/bin/git' is fine for Ubuntu and Arch Linux
+# and '/usr/local/bin/git' for FreeBSD :
+if [ -f /usr/bin/git ] || [ -f /usr/local/bin/git ] && [ ! ~/.gitconfig ] ; then
   # set the default config editor for git to be nano
   git config --global core.editor "nano -w"
   # set the git name and email to use for this account
@@ -225,7 +238,6 @@ alias glib='cd ~/MoonStore/Sybil-Library/Technical-Info'
 alias ggo='cd ~/MoonStore/Development-Code/Go/src/github.com/wiremoons'
 alias gtd='cd ${TOOLDIR}'
 alias gweb='cd ~/MoonStore/Development-Code/WebSites'
-alias handbrake="HandBrake"
 #
 # run scripts in MoonStore
 alias ds='${TOOLDIR}/doc-search'
@@ -243,3 +255,5 @@ alias qcon='telnet localhost 3010'
 alias iotop='sudo iotop -Pao'
 alias tst='ssh -L 8090:127.0.0.1:8080 server.local'
 alias restart-conky='killall -SIGUSR1 conky'
+alias wakeblu='sudo wakeonlan 9c:5c:8e:74:83:56'
+
