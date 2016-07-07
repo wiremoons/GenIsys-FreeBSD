@@ -3,6 +3,13 @@
 #	Installation Script for FreeBSD
 #
 #  Created on: 28 May 2016 by Simon Rowe
+#  Updated on: 06 Jul 2016 to add GitHub repo info and clone steps plus other minor updates
+#
+#  Source script is on GitHub and can be downloaded with:
+#  	curl -sL https://goo.gl/sw6oMt -o Install-FreeBSD-10.3
+#				or
+#	wget https://goo.gl/sw6oMt -O Install-FreeBSD-10.3
+#
 #
 printf "\n\n        FreeBSD Installation Script for Release 10.3\n"
 printf "        --------------------------------------------\n\n\n"
@@ -28,7 +35,7 @@ printf "\n"
 # TODO: check for pools and then only do snapshot if they exist
 # TODO: make sure ZFS is being used before trying to snapshot
 #
-read -p "Do you want to create the suggest snapshots y/n " -t 10s -re REPLY
+read -p "Do you want to create the suggest ZFS snapshots shown above?  y/n " -t 10s -re REPLY
 if [ $REPLY == y ] || [ $REPLY == Y ] ; then
 	zfs snapshot -r zroot@FreshInstall-$(date +%Y%b%d_%H%M%S)
 	zfs snapshot -r bootpool@FreshInstall-$(date +%Y%b%d_%H%M%S)
@@ -78,12 +85,18 @@ sleep 2
 #
 # install XWindows with Nvidia drivers
 #
+# for i3: i3 i3lock i3status compton slim
+# for mate: mate mate-desktop slim : exec mate-session
+# for lumina: lumina : exec start-lumina-desktop
+#
+#  TODO: move apps to a seperate 'desktop' apps install option (add libreoffice, gimp, etc)
+#
 printf "\n\nINSTALL XWINDOWS SYSTEMS AND DRIVERS\n\n"
-printf "\nInstalling Nvidia graphics card drivers and XWindows Desktop...\n"
-read -p "Do you want to install these items y/n " -t 10 -re REPLY
+printf "\nInstalling Nvidia graphics card drivers and GUI Desktop...\n"
+read -p "Do you want to install these items?  y/n " -t 10 -re REPLY
 if [ $REPLY == y ] || [ $REPLY == Y ] ; then
 	pkg install nvidia-driver nvidia-xconfig nvidia-settings chromium \
-	vlc i3 i3lock i3status compton slim xorg 
+	vlc xorg lumina
 	sleep 2
 	#
 	# configure the new system settings
@@ -131,15 +144,16 @@ if [ $REPLY == y ] || [ $REPLY == Y ] ; then
 	nvidia-xconfig --add-argb-glx-visuals
 	nvidia-xconfig --composite
 	#
-	#  TODO
+	#  TODO - not neeed as will be done in user config script 'setup-home'
 	#  copy from config dir the xinitrc to ~/.xinitrc so i3 starts with compton etc 
 fi
 #
 # install 'server' xwindows minimal setup to use Chromium web browser
+# # TODO - dont offer this if Nvida and XWindows was selected above - use env variable to manage?
 #
-printf "\n\nINSTALL XWINDOWS SYSTEMS AND DRIVERS - 'SERVER'\n\n"
+printf "\n\nINSTALL XWINDOWS SYSTEMS AND DRIVERS - ** 'SERVER' **\n\n"
 printf "\nInstalling Frame Buffer graphics card drivers and Chromium...\n"
-read -p "Do you want to install these items y/n " -t 10 -re REPLY
+read -p "Do you want to install these items?  y/n " -t 10 -re REPLY
 if [ $REPLY == y ] || [ $REPLY == Y ] ; then
 	pkg install xf86-video-scfb chromium xorg xdm
 	sleep 2
@@ -215,7 +229,27 @@ else
 	printf "DONE\n"
 fi
 #
-# install
+#
+#
+# Check and then offer to clone the GenIsys-FreeBSD GitHub repo now git is installed - if required by the user
+printf "\nQUESTION:\n"
+read -p "Clone GitHub 'GenIsys-FreeBSD' repo to you home directory?  y/n " -t 30 -re REPLY
+if [ $REPLY == y ] || [ $REPLY == Y ] ; then
+    # clone repo - see https://www.github.com/wiremoons/GenIsys-FreeBSD:
+    printf "\nGenIsys-FreeBSD CLONE\n"
+    if [ ! -d ~/GenIsys-FreeBSD ] ; then
+	git clone https://https://www.github.com/wiremoons/GenIsys-FreeBSD ~/GenIsys-FreeBSD/
+	printf "\n    GenIsys-FreeBSD cloned to your home directory\n"
+	printf "\nDONE\n"
+    else
+	printf "\n    GenIsys-FreeBSD directory already exists in your home directory !!!\n"
+    fi
+else
+	printf "\nNo clone of GenIsys-FreeBSD created at user's request\n"
+fi
+sleep 2
+#
+# install complete - check and suggest other changes to user
 #
 printf "Manual items to edit\n"
 # check if need to add setting in support of package 'nss_mdns'
@@ -225,15 +259,17 @@ else
 	printf "\nedit '/etc/nsswitch.conf' --> change 'hosts: files dns'  to  'hosts: files mdns dns'\n"
 fi
 #
-# todo: add /etc/ssh/sshd_conf - root login permit and issue.net banner
-# server - add dhcpd config and daemon
-# server - add sshguard with
+# todo: 
+#	- add /etc/ssh/sshd_conf - root login permit and issue.net banner
+# 	- server - add dhcpd config and daemon
+# 	- server - add sshguard with
 #sshguard_enable="YES"
 #sshguard_safety_thresh="30"
 #sshguard_pardon_min_interval="600"
 #sshguard_prescribe_interval="7200"
-# or run from 'etc/syslog.conf' with line:
-#auth.info;authpriv.info |exec /usr/local/sbin/sshguard -a 3 -p 9200 -s 12000
+# or alternative setup is to run from 'etc/syslog.conf' with line:
+#	auth.info;authpriv.info |exec /usr/local/sbin/sshguard -a 3 -p 9200 -s 12000
+#
 # enable IPFW:
 # add to /etc/rc.conf
 #firewall_enable="YES"
@@ -248,16 +284,16 @@ fi
 #
 #
 # Check and then install the firewall if required by the user
-read -p "Do you want to configure and use the IPFW FreeBSD firewall  y/n " -t 10s -re REPLY
-if [ $REPLY == y ] || [ $REPLY == Y ] ; then
-        #zfs snapshot -r zroot@FreshInstall-$(date +%Y%b%d_%H%M%S)
-        #zfs snapshot -r bootpool@FreshInstall-$(date +%Y%b%d_%H%M%S)
-        printf "ZFS snapshots created - snapshots on the file systems are:\n"
-        #zfs list -t snapshot
-        printf "\nDONE\n"
-else
-        printf "\nNo ZFS snapshots created at user's request\n"
-fi
-sleep 2
+#read -p "Do you want to configure and use the IPFW FreeBSD firewall  y/n " -t 10s -re REPLY
+#if [ $REPLY == y ] || [ $REPLY == Y ] ; then
+#        #zfs snapshot -r zroot@FreshInstall-$(date +%Y%b%d_%H%M%S)
+#        #zfs snapshot -r bootpool@FreshInstall-$(date +%Y%b%d_%H%M%S)
+#        printf "ZFS snapshots created - snapshots on the file systems are:\n"
+#        #zfs list -t snapshot
+#        printf "\nDONE\n"
+#else
+#        printf "\nNo ZFS snapshots created at user's request\n"
+#fi
+#sleep 2
 
 
