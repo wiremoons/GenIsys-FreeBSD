@@ -66,12 +66,12 @@ fi
 #
 # control if colour prompt below is used - have different colour for different computers
 # for more colour codes: https://wiki.archlinux.org/index.php/Color_Bash_Prompt
-#  \e[00m == text ; \e[30m == black ; \e[32m == green ; \e[34m == blue ; \e[35m == purple ; \e[36m == cyan ; 
+#  \e[00m == text ; \e[30m == black ; \e[32m == green ; \e[34m == blue ; \e[35m == purple ; \e[36m == cyan ;
 export color_prompt=yes
 # get out current hostname for use below - to manage prompt colours for different systems
 export HOSTNAME=`hostname`
 # set the prompt - with different color for the 'user@host' element of the prompt
-#  if colour prompt - set different one for each host 
+#  if colour prompt - set different one for each host
 if [ "$color_prompt" = yes ]; then
   if [ $HOSTNAME == blumoons ] ; then
       # green prompt
@@ -92,7 +92,7 @@ fi
 #-----------------------------------------------------------------------------
 #    SETUP env variable $TOOLDIR to point to local scripts held in GenIsys-FreeBSD
 #-----------------------------------------------------------------------------
-# Create ${TOOLDIR} env variable to store location for bin & scripts folder 
+# Create ${TOOLDIR} env variable to store location for bin & scripts folder
 # - only if it exists
 if [ -d /home/simon/GenIsys-FreeBSD/assets ] ; then
   TOOLDIR=/home/simon/GenIsys-FreeBSD/assets
@@ -111,7 +111,7 @@ export PATH
 #-----------------------------------------------------------------------------
 #    SETUP GOLANG  ~/MoonStore/apps/freebsd/go-bsd  ~/MoonStore/Development-Code/Go
 #-----------------------------------------------------------------------------
-# Add Go Language $GOPATH to the ~/MoonStore Go code library - if directory exists and 
+# Add Go Language $GOPATH to the ~/MoonStore Go code library - if directory exists and
 # the env variable does not already contain the info
 if [ -d ~/MoonStore/Development-Code/Go ] ; then
   # check the GOPATH is not already included from elsewhere?
@@ -244,6 +244,14 @@ alias tcl='/usr/bin/rlwrap ${TOOLDIR}/tclsh'
 alias conwin='${TOOLDIR}/con-win'
 alias conwork='${TOOLDIR}/con-work'
 #
+# run X-Windows apps from server on our local system - remote gui apps
+alias rnaut='ssh -X simon@server.local "export NO_AT_BRIDGE=1 ; nohup nautilus &"'
+alias rhandb='ssh -X simon@server.local "export NO_AT_BRIDGE=1 ; nohup ghb &"'
+alias rchrome='ssh -X simon@server.local "export NO_AT_BRIDGE=1 ; nohup google-chrome &"'
+alias vncserver="ssh -t -L 5900:localhost:5900 server.local 'x11vnc -localhost -display :0'"
+alias tst='ssh -L 8090:127.0.0.1:8080 server.local'
+alias sshplex='ssh 10.0.10.10 -L 8888:localhost:32400'
+#
 #  run commandline tools with define parameters
 alias shownet='sudo netstat -tuape | grep -v tcp6 | grep -v udp6'
 alias emacs='emacs -nw'
@@ -255,4 +263,10 @@ alias iotop='sudo iotop -Pao'
 alias tst='ssh -L 8090:127.0.0.1:8080 server.local'
 alias restart-conky='killall -SIGUSR1 conky'
 alias wakeblu='sudo wakeonlan 9c:5c:8e:74:83:56'
+#
+# give out help info
+alias pine='echo "" ; echo "You mean \"alpine\" I believe Watson..."; echo ""'
+alias uedit='echo "" ; echo "You mean \"uex\" or \"ue\" I believe Watson..."; echo ""'
+# to create new use:   echo "put-your-secret-text-here" | openssl enc -base64 -e -aes-256-cbc -nosalt
+alias ggh='echo "u9btYvV8G6L7otRe9nLjOZihAExO4dXKKz9TdQhoe7SFrBk8gBk8Qtwr+CX9mxnb" | openssl enc -base64 -d -aes-256-cbc -nosalt'
 
