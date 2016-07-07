@@ -51,9 +51,9 @@ HISTSIZE=5000
 #
 # set options for mksh - use set -o to show current settings
 # set UTF-8 mode
-set -U
+#set -U
 # add trailing '/' to directory names
-set -X
+#set -X
 # use Emacs or vi mode
 #set -o emacs
 set -o vi
