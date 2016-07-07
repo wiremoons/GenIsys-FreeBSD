@@ -1,0 +1,452 @@
+#!/bin/sh
+#
+#  Script to setup the symbolic links for configuration files for using
+#  FreeBSD on a computer
+#
+# location of configuration and setup files - obtained from Git repo
+# and put in place by the 'Install-Ubuntu' script run before this one
+GENIFILES='/home/simon/GenIsys-FreeBSD'
+#
+#
+#  command line checking: if [ $HOSTNAME == blumoons ] ; then printf "yes\n" ; else printf "no\n" ; fi
+#
+printf "\nHOME DIRECTORY CONFIGURATION SCRIPT\n\nRunning with following details\n\n"
+printf "\tScript: '%s'\n\tHostname:'%s'\n\tOS: '%s'\n\tUser '%s'\n\n" \
+            "$0" "$HOSTNAME" "$(uname)" "$(whoami)"
+
+
+# Check that $GENIFILES is pointing to a location that exists....
+if [ ! -d $GENIFILES ] ; then
+    printf "ERROR: location '$GENIFILES' does not exist - please correct and re-run\n"
+    exit
+fi 
+
+printf "\nLINKING & CREATING DIRECTORIES\n\n"
+printf "linking '~/Downloads' to '/datastore/SyncData/Downloads'...\n"
+if [ -d /datastore/SyncData/Downloads ] && \
+   [ ! -L /home/simon/Downloads ] && \
+   [ ! -d /home/simon/Downloads ] ; then
+	ln -s /datastore/SyncData/Downloads ~/Downloads
+	echo "        DONE"
+else
+	echo "        Link ~/Downloads already exists - skipping"
+fi
+
+echo "Linking ~/Pictures/Photos to /datastore/Photos ..."
+if [ -d /datastore/Photos ] && \
+   [ -d ~/Pictures ] && \
+   [ ! -L ~/Pictures/Photos ] ; then
+	ln -s /datastore/Photos ~/Pictures/Photos
+	echo "        DONE"
+else
+	echo "        Link ~/Pictures/Photos to /datastore/Photos already exists - skipping"
+fi
+
+echo "Linking ~/Work to /datastore/Work ..."
+if [ -d /datastore/Work ] && \
+   [ ! -L ~/Work ] && \
+   [ ! -d ~/Work ] ; then
+	ln -s /datastore/Work ~/Work
+	echo "        DONE"
+elif [ ! -d /datastore/Work ] ; then
+	echo "        Warning: no '/datastore/Work' found - skipping"
+else
+	echo "        Link ~/Work already exists - skipping"
+fi
+
+echo "Creating ~/.unison..."
+if [ ! -d ~/.unison ] && \
+   [ ! -L ~/.unison ] ; then
+	mkdir ~/.unison
+	echo "        DONE"
+else
+	echo "        ~/.unison already exists - skipping"
+fi
+
+echo ""
+echo "LINKING & CREATING FILES"
+echo ""
+echo "Setup config files for: shells"
+# Setup bash shell - if installed on the system
+if [ -x /bin/bash ]; then
+    #
+	# if exists a ~.bashrc that is not a symbolic link - move it as backup
+	if [ -f ~/.bashrc ] && [ ! -L ~/.bashrc ] ; then
+		echo "existing ~/.bashrc found - backing up..."
+		mv ~/.bashrc ~/.bashrc-orig-$(date -d "today" +"%Y-%m-%d_%H.%M")
+	fi
+	# if there is no .bashrc and no symbolic link to one - create it
+    if [ ! -f ~/.bashrc ] && \
+	   [ ! -L ~/.bashrc ] && \
+	   [ -f $GENIFILES/configs/bashrc ] ; then
+		echo "Linking to new '.bashrc' in '$GENIFILES'"
+		ln -s $GENIFILES/configs/bashrc ~/.bashrc
+		echo "        DONE"
+	else
+		echo "        ~/.bashrc already exists - skipping"
+	fi
+	# also set up bash_aliases too
+	if [ ! -f ~/.bash_aliases ] && \
+	   [ ! -L ~/.bash_aliases ] && \
+	   [ -f $GENIFILES/configs/bash_aliases ] ; then
+		echo "Linking .bash_aliases..."
+		ln -s $GENIFILES/configs/bash_aliases ~/.bash_aliases
+		echo "        DONE"
+	else
+		echo "        ~/.bash_aliases already exists - skipping"
+	fi
+fi
+# Setup sh or mksh shell - if installed on the system
+if [ -x /bin/sh ] || [ -x /usr/local/bin/mksh ]; then
+    #
+	# if exists a ~.bashrc that is not a symbolic link - move it as backup
+	if [ -f ~/.profile ] && [ ! -L ~/.profile ] ; then
+		echo "existing ~/.profile found - backing up..."
+		mv ~/.profile ~/.profile-orig-$(date -d "today" +"%Y-%m-%d_%H.%M")
+	fi
+	# if there is no .bashrc and no symbolic link to one - create it
+    	if [ ! -f ~/.profile ] && \
+	   [ ! -L ~/.profile ] && \
+	   [ -f $GENIFILES/configs/profile ] ; then
+		echo "Linking to new '.profile' in '$GENIFILES'"
+		ln -s $GENIFILES/configs/profile ~/.profile
+		echo "        DONE"
+	else
+		echo "        ~/.profile already exists - skipping"
+	fi
+	# also set up bash_aliases too
+	if [ ! -f ~/.mksh_aliases ] && \
+	   [ ! -L ~/.mksh_aliases ] && \
+	   [ -f $GENIFILES/configs/mksh_aliases ] ; then
+		echo "Linking .mksh_aliases..."
+		ln -s $GENIFILES/configs/mksh_aliases ~/.mksh_aliases
+		echo "        DONE"
+	else
+		echo "        ~/.mksh_aliases already exists - skipping"
+	fi
+fi
+
+# add custom red coloured prompt to root .bashrc
+# PS1='${chroot_env:+($chroot_env)}\[\033[01;31m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\] \# '
+
+# Gimp Keyboard shortcuts:
+echo "Setup config files for: Gimp"
+# file exists too :
+if [ -f ~/.gimp-2.8/menurc ] && \
+   [! -L ~/.gimp-2.8/menurc ] && \
+   [ -f $GENIFILES/configs/gimp-menurc ] ; then
+	echo "File: ~/.gimp-2.8/menurc found - backing up..."
+	mv ~/.gimp-2.8/menurc ~/.gimp-2.8/menurc-orig-$(date -d "today" +"%Y-%m-%d_%H.%M")
+	echo "Linking to new Gimp .menurc in MoonStore"
+	ln -s $GENIFILES/configs/gimp-menurc ~/.gimp-2.8/menurc
+	echo "        DONE"
+else
+	echo "        ~/.gimp-2.8/menurc already exists - skipping"
+fi
+
+# UBUNTU pre 15.04 Release ONLY - as uses UpStart
+# create if there is no ~/.config/upstart/syncthing.conf symbollic link 
+# - and the MoonStore file exists too :
+#if [ ! -f ~/.config/upstart/syncthing.conf ] && \
+#   [ ! -L ~/.config/upstart/syncthing.conf ] && \
+#   [ -f $GENIFILES/configs/syncthing.conf ] ; then
+#	echo "Linking to new Upstart syncthing.conf in MoonStore"
+#	ln -s ~/MoonStore/apps/linux/configs/syncthing.conf ~/.config/upstart/syncthing.conf
+#	echo "        DONE"
+#else
+#	echo "        ~/.config/upstart/syncthing.conf already exists - skipping"
+#fi
+
+# Ubuntu - 15.04 onwards as uses systemd
+# create a ~/.config/systemd/user/ directory if is does not exists
+if [ $(uname) == "Linux" ] ; then
+    echo "Setup config files for: Syncthing (on Ubuntu)"
+    echo "        Checking for ~/.config/systemd/user directory..."
+    if [ ! -d ~/.config/systemd/user ] && \
+       [ ! -L ~/.config/systemd/user ] ; then
+        mkdir -p ~/.config/systemd/user
+    	echo "        DONE"
+    else
+	    echo "        ~/.config/systemd/user directory already exists - skipping"
+    fi
+    if [ ! -f ~/.config/systemd/user/syncthing.service ] && \
+       [ ! -L ~/.config/systemd/user/syncthing.service ] && \
+       [ -f $GENIFILES/configs/syncthing.service ] ; then
+    	echo "Linking systemd config for syncthing.service..."
+    	cp $GENIFILES/configs/syncthing.service ~/.config/systemd/user/syncthing.service
+    	echo "        DONE"
+    else
+	    echo "        ~/.config/systemd/user/syncthing.service already exists - skipping"
+    fi
+fi
+
+echo "Setting up other misc program files..."
+# if there is not already a .screenrc_aliases as a file or symbolic link 
+# - and the MoonStore file exists too :
+if [ ! -f ~/.screenrc ] && \
+   [ ! -L ~/.screenrc ] && \
+   [ -f $GENIFILES/configs/screenrc ] ; then
+	echo "Linking .screenrc..."
+	ln -s $GENIFILES/configs/screenrc ~/.screenrc
+	echo "        DONE"
+else
+	echo "        ~/.screenrc already exists - skipping"
+fi
+
+# if there is not already a .nanorc as a file or symbolic link 
+# - and the MoonStore file exists too :
+if [ ! -f ~/.nanorc ] && \
+   [ ! -L ~/.nanorc ] && \
+   [ -f $GENIFILES/configs/nanorc ] ; then
+	echo "Linking .nanorc..."
+	ln -s $GENIFILES/configs/nanorc ~/.nanorc
+	echo "        DONE"
+else
+	echo "        ~/.nanorc already exists - skipping"
+fi
+
+# if there is no .gitconfig as a file or symbolic link 
+# - and the MoonStore file exists too :
+if [ ! -f ~/.gitconfig ] && \
+   [ ! -L ~/.gitconfig ] && \
+   [ -f $GENIFILES/configs/gitconfig ] ; then
+	echo "Linking .gitconfig..."
+	ln -s $GENIFILES/configs/gitconfig ~/.gitconfig
+	echo "        DONE"
+else
+	echo "        ~/.gitconfig already exists - skipping"
+fi
+
+# BLUMOONS: if there is not already a .conkyrc as a file or symbolic link 
+# - and the MoonStore file exists too :
+if [ ! -f ~/.conkyrc ] && \
+   [ ! -L ~/.conkyrc ] && \
+   [ -f $GENIFILES/configs/conkyrc-blumoons ] && \
+   [ $HOSTNAME == blumoons ] ; then
+	echo "Linking .conkyrc (BLUMOONS)..."
+	ln -s $GENIFILES/configs/conkyrc-blumoons ~/.conkyrc
+	echo "        DONE"
+else
+	echo "        ~/.conkyrc (BLUMOONS) already exists - skipping"
+fi
+
+# SERVER: if there is not already a .conkyrc as a file or symbolic link - 
+# and the MoonStore file exists too :
+if [ ! -f ~/.conkyrc ] && \
+   [ ! -L ~/.conkyrc ] && \
+   [ -f $GENIFILES/configs/conkyrc-server ] && \
+   [ $HOSTNAME == server ] ; then
+	echo "Linking .conkyrc (SERVER)..."
+	ln -s $GENIFILES/configs/conkyrc-server ~/.conkyrc
+	echo "        DONE"
+else
+	echo "        ~/.conkyrc (SERVER) already exists - skipping"
+fi
+
+#~/.config/gtk-3.0/settings.ini
+#[Settings]
+#gtk-application-prefer-dark-theme=1
+
+########################################################
+# Add support for UltraEdit editor
+########################################################
+
+echo "Setup config files for: UltraEdit"
+
+# check that UltraEdit is installed and has been run once by presence of ~/.idm directory
+
+if [  -d ~/.idm ] ; then
+    
+    # check and create spell directory if does not exist
+    if [ ! -d ~/.idm/uex/spell ] ; then
+       mkdir -p ~/.idm/uex/spell
+    fi
+    
+    # '.abbrev_defs' file not used by UltraEdit ?? - left just in case 
+    # if file exists back it up - and create symbolic link instead, otherwise just skip
+    #if [[ -f ~/.idm/uex/spell/.abbrev_defs && ! -L ~/.idm/uex/spell/.abbrev_defs && -f ~/MoonStore/apps/linux/configs/abbrev_defs ]] ; then
+    #    mv ~/.idm/uex/spell/.abbrev_defs ~/.idm/uex/spell/.abbrev_defs-orig-$(date -d "today" +"%Y-%m-%d_%H.%M")
+    #    ln -s ~/MoonStore/apps/linux/configs/abbrev_defs $HOME/.idm/uex/spell/.abbrev_defs
+    #    echo "      Added symbolic link to ~/MoonStore/apps/linux/configs/abbrev_defs for UltraEdit"
+    #else
+    #    echo "      ~/.idm/uex/spell/.abbrev_defs already exists - skipping"
+    #fi
+    
+    # UltraEdit - personal dictionary file (shared with Emacs config also)
+    if [ -f ~/.idm/uex/spell/.aspell.en.pws ] && \
+       [ ! -L ~/.idm/uex/spell/.aspell.en.pws ] && \
+       [ -f $GENIFILES/configs/aspell.en.pws ] ; then
+        mv ~/.idm/uex/spell/.aspell.en.pws ~/.idm/uex/spell/.aspell.en.pws-orig-$(date -d "today" +"%Y-%m-%d_%H.%M")
+        ln -s $GENIFILES/configs/aspell.en.pws ~/.idm/uex/spell/.aspell.en.pws
+        echo "      Added symbolic link to $GENIFILES/configs/aspell.en.pws for UltraEdit"
+    else
+        echo "      ~/.idm/uex/spell/.aspell.en.pws already exists - skipping"
+    fi
+    
+    # UltraEdit - word fixes file (ie wiht fixed to with) and (shared with Emacs config also)
+    if [ -f ~/.idm/uex/spell/.aspell.en.prepl ] && \
+       [ ! -L ~/.idm/uex/spell/.aspell.en.prepl ] && \
+       [ -f $GENIFILES/configs/aspell.en.prepl ] ; then
+        mv ~/.idm/uex/spell/.aspell.en.prepl ~/.idm/uex/spell/.aspell.en.prepl-orig-$(date -d "today" +"%Y-%m-%d_%H.%M")
+        ln -s $GENIFILES/configs/aspell.en.prepl ~/.idm/uex/spell/.aspell.en.prepl
+        echo "      Added symbolic link to $GENIFILES/configs/aspell.en.prepl for UltraEdit"
+    else
+        echo "      ~/.idm/uex/spell/.aspell.en.prepl already exists - skipping"
+    fi
+else
+    echo "        UltraEdit not installed - skipping"
+fi
+
+########################################################
+# Add support for Vim editor and for Vim Golang support
+########################################################
+#
+echo "Setup config files for: Vim"
+# only run if vim is installed in: /usr/local/bin/vim
+if [[ -x /usr/local/bin/vim ]] ; then
+      if [ ! -f ~/.vimrc ] && \
+         [ ! -L ~/.vimrc ] && \
+         [ -f $GENIFILES/configs/vimrc ] ; then
+      	echo "Linking .vimrc..."  
+              ln -s $GENIFILES/configs/vimrc ~/.vimrc
+      	echo "        DONE"
+      else
+      	echo "        ~/.vimrc already exists - skipping"
+      fi
+      
+      if [ ! -d ~/.vim/ftdect ] ; then
+          mkdir -p ~/.vim/ftdetect 
+          echo "        Created directory: ~/.vim/ftdect"
+      fi
+      if [ ! -d ~/.vim/syntax ] ; then
+          mkdir -p ~/.vim/syntax
+          echo "        Created directory: ~/.vim/syntax"
+      fi
+      if [ ! -d ~/.vim/autoload/go ] ; then
+          mkdir -p ~/.vim/autoload/go
+          echo "        Created directory: ~/.vim/autoload/go"
+      fi
+      # add directory to add vim bundles too
+      if [ ! -d ~/.vim/bundle ] ; then
+          mkdir -p ~/.vim/bundle
+          echo "        Created directory: ~/.vim/bundle"
+      fi
+      #
+      # link files into new '~/vim/' directory created above
+      if [ ! -f ~/.vim/ftdetect/gofiletype.vim ] && \
+         [ ! -L ~/.vim/ftdetect/gofiletype.vim ] && \
+         [ -f $GOROOT/misc/vim/ftdetect/gofiletype.vim ] ; then
+          ln -s $GOROOT/misc/vim/ftdetect/gofiletype.vim ~/.vim/ftdetect/
+          echo "        Added symbolic link to $GOROOT/misc/vim/ftdetect/gofiletype.vim"
+      else
+          echo "        Symbolic link to $GOROOT/misc/vim/ftdetect/gofiletype.vim already exists - skipping"
+      fi
+      
+      if [ ! -f ~/.vim/syntax/go.vim ] && \
+         [ ! -L ~/.vim/syntax/go.vim ] && \
+         [ -f $GOROOT/misc/vim/syntax/go.vim ] ; then
+          ln -s $GOROOT/misc/vim/syntax/go.vim ~/.vim/syntax
+          echo "        Added symbolic link to $GOROOT/misc/vim/syntax/go.vim"
+      else
+          echo "        Symbolic link to $GOROOT/misc/vim/syntax/go.vim already exists - skipping"
+      fi
+      
+      if [ ! -f ~/.vim/autoload/go/complete.vim ] && \
+         [ ! -L ~/.vim/autoload/go/complete.vim ] && \
+         [ -f $GOROOT/misc/vim/autoload/go/complete.vim ] ; then
+          ln -s $GOROOT/misc/vim/autoload/go/complete.vim ~/.vim/autoload/go
+          echo "        Added symbolic link to $GOROOT/misc/vim/autoload/go/complete.vim"
+      else
+          echo "        Symbolic link to $GOROOT/misc/vim/autoload/go/complete.vim already exists - skipping"
+      fi
+      # Install 'Pathogen' support for packagement in Vim
+      #  - see: https://github.com/tpope/vim-pathogen
+      if [ ! -f ~/.vim/autoload/pathogen.vim ] ; then
+          wget https://raw.githubusercontent.com/tpope/vim-pathogen/master/autoload/pathogen.vim -P ~/.vim/autoload/
+          echo "        Installing Pathogen in ~/.vim/autoload/pathogen.vim"
+      else
+          echo "        Vim Pathogen support installed already - skipping"
+      fi
+      # add vim Git support using pluggin vim-fugitive - require 'Pathogen' package manager
+      if [ -d ~/.vim/bundle ] && \
+         [ ! -d ~/.vim/bundle/vim-fugitive ] && \
+         [ -f ~/.vim/autoload/pathogen.vim ] ; then
+          cd ~/.vim/bundle
+          git clone git://github.com/tpope/vim-fugitive.git
+          vim -u NONE -c "helptags vim-fugitive/doc" -c q
+          echo "        Installed vim fugitive - Git support"
+      else
+          echo "        Fugitive Git support installed for vim already - skipping"
+      fi
+else
+	echo "Vim is not installed - skipping"
+fi	
+
+#########################################################
+# add support for jed
+########################################################
+
+# add jed startup file to home directory: ~/.jedrc
+echo "Setup config files for: jed"
+# only run of Jed is installed in: /usr/bin/jed
+if [ -x /usr/local/bin/jed ] ; then
+      if [ ! -f ~/.jedrc ] && \
+         [ ! -L ~/.jedrc ] && \
+         [ -f $GENIFILES/configs/jedrc ] ; then
+          ln -s $GENIFILES/configs/jedrc ~/.jedrc
+          echo "        Added symbolic link to $GENIFILES/configs/jedrc"
+      else
+          echo "        ~/.jedrc already exists - skipping"
+      fi
+else
+	echo "        Jed is not installed - skipping"
+fi
+
+#########################################################
+# add support for emacs
+########################################################
+
+echo "Setup config files for: emacs"
+# only run if emacs is installed in: /usr/bin/emacs
+if [ -x /usr/local/bin/emacs ] ; then
+      if [ ! -f ~/.abbrev_defs ] && \
+         [ ! -L ~/.abbrev_defs ] && \
+         [ -f $GENIFILES/configs/abbrev_defs ] ; then
+          ln -s $GENIFILES/configs/abbrev_defs ~/.abbrev_defs
+          echo "      Added symbolic link to $GENIFILES/configs/abbrev_defs"
+      else
+          echo "      ~/.abbrev_defs already exists - skipping"
+      fi
+      
+      if [ ! -f ~/.aspell.en.pws ] && \
+         [ ! -L ~/.aspell.en.pws ] && \
+         [ -f $GENIFILES/configs/aspell.en.pws ] ; then
+          ln -s $GENIFILES/configs/aspell.en.pws ~/.aspell.en.pws
+          echo "      Added symbolic link to $GENIFILES/configs/aspell.en.pws"
+      else
+          echo "      ~/.aspell.en.pws already exists - skipping"
+      fi
+      
+      if [ ! -f ~/.aspell.en.prepl ] && \
+         [ ! -L ~/.aspell.en.prepl ] && \
+         [ -f $GENIFILES/configs/aspell.en.prepl ] ; then
+          ln -s $GENIFILES/configs/aspell.en.prepl ~/.aspell.en.prepl
+          echo "      Added symbolic link to $GENIFILES/configs/aspell.en.prepl"
+      else
+          echo "      ~/.aspell.en.prepl already exists - skipping"
+      fi
+      
+      if [ ! -f ~/.emacs ] && \
+         [ ! -L ~/.emacs ] && \
+         [ -f $GENIFILES/configs/emacs ] ; then
+          ln -s $GENIFILES/configs/emacs ~/.emacs
+          echo "      Added symbolic link to $GENIFILES/configs/emacs"
+      else
+          echo "      ~/.emacs already exists - skipping"
+      fi
+else
+	echo "        Emacs not installed - skipping"
+fi
+
+
+
