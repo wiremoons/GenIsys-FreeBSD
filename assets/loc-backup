@@ -1,0 +1,12 @@
+#!/bin/sh
+#
+#  Script to backup the /datastore disk to the /backup disk
+#  uses rsync to ensure the files are mirrored from one drive to the other
+#  WARNING: this will delete any files from the DST directory also!
+
+# alter the variable below to point to you source and destination folders
+#
+SRC='/datastore/'
+DST='/media/simon/6TB-USB3/'
+
+sudo rsync -PhaWL --delete --stats --exclude "lost+found/" --exclude "System Volume Information/" --exclude "\$RECYCLE.BIN/" --exclude ".Trash-1000/" $SRC $DST

@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+# script to compress and encrypt the syncthing config files
+#  Written 01 Jan 2014 by Simon Rowe
+#  Updated 04 Jan 2014 by Simon Rowe - added check for 7z exit code 
+#  Updated 31 Oct 2015 by Simon Rowe - added check for 7z executable
+#  Updated 02 Apr 2016 by Simon Rowe - corrected error when moving new backup file
+#  updtaed 06 Jul 2016 by Simon Rowe - minor spelling corrections
+#
+printf "\n"
+printf "Checking for syncthing config files in ~/.config/syncthing/ ...\n"
+printf "\n"
+if [ -d ~/.config/syncthing ] ; then
+    cd ~/.config/syncthing
+else
+    printf "ERROR: unble to find: ~/.config/syncthing\nABORTED\n"
+    exit 2
+fi
+printf "Changed to: %s\n" "$(pwd)"
+export STBKFILE=syncthing-$HOSTNAME-backup-$(date -d "today" +"%Y-%m-%d_%H.%M").7z
+printf "\n"
+printf "Checking for 7zip application... "
+if [ ! -x /usr/bin/7z ] ; then
+		printf "ERROR: install 7z on you computer first\nABORT\n"
+		exit 8
+else
+		printf "Begining 7z Compression and Encryption for %s...." "$STBKFILE\n"
+fi
+printf "Begining 7z Compression and Encryption for %s...." "$STBKFILE\n"
+# run the password protected and encrypted archive using 7z
+# NB: user will be prompted for a password to use for encryption
+/usr/bin/7z a $STBKFILE . -p -mhe -mx9 -xr\!index
+# check 7z ran ok
+if [ $? -ne 0 ]; then
+    printf "ERROR: 7z Compression failed!\nABORT\n"
+    exit 4
+else
+    printf "DONE 7z COMPRESSION !!\n"
+fi
+#
+# Now move the backup files to a known location - dependant on the computer
+# this script is being run on - adapt below for any new computer as needed
+#
+printf "Attempting to move backup file %s to backup location...\n" "$STBKFILE"
+if [ -f $STBKFILE ] ; then
+	# running on surfmoons computer?
+	if [ "$HOSTNAME" = "surfmoons" ] ; then
+		printf "Moving %s to ~/Backups/...\n" "$STBKFILE"
+		if [ -f $STBKFILE ] && [ -d $HOME/BackUps/ ] ; then
+			mv $STBKFILE $HOME/BackUps/
+		else
+			printf "ERROR: Unable to find %s or or the backup location\n" "$STBKFILE"
+		fi
+	fi
+	# running on server computer?
+	if [ "$HOSTNAME" = "SERVER" ] ; then
+		printf "Moving %s to /datastore/backups/...\n" "$STBKFILE"
+		if [ -f $STBKFILE ] && [ -d /datastore/SyncData/BackUps/ ] ; then
+			mv $STBKFILE /datastore/SyncData/BackUps/
+		else
+			printf "ERROR: Unable to find %s or or the backup location\n" "$STBKFILE"
+		fi
+	else
+		printf "ERROR: Unable to identify you computer name\n"
+	fi
+else
+	# not sure what computer we are running on - so warn user...
+	printf "ERROR: unable to mv $STBKFILE to correct storeage location - such as: $HOME/BackUps/\n"
+	printf "Please move the $STBKFILE somewhere suitable yourself\n"
+	printf "The file is located here: ~/.config/syncthing/\n"
+    exit 3
+fi
+# DONE!!	 
+printf "ALL IS WELL\n"

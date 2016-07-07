@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+#
+#  Script to run Sublime Text 2 from the command line
+#
+if [ -x ~/MoonStore/apps/linux/SublimeText2/sublime_text ] ; then
+	# run sublime_text passing all command line parameters and redirect any output to /dev/null
+	# as sublime often prints out lots of Gdk warnings. Also background process to free the
+	# console / terminal for further use
+	~/MoonStore/apps/linux/SublimeText2/sublime_text ${*} > /dev/null 2>&1 &
+else
+	echo "ERROR: unbale to locate or run: ~/MoonStore/apps/linux/SublimeText2/sublime_text"
+fi
+

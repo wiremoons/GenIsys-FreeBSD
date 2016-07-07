@@ -1,0 +1,14 @@
+#!/bin/bash
+#
+# Script to convert the .webarchive file to plain text. Uses the utility application html2text which
+# can be installed on Linux with 'apt-get intall html2txt'
+# Script created on 21st Feb 2014 by Simon Rowe
+#
+counter=0
+for file in *.webarchive; do 
+    filename=`basename "$file" .webarchive`
+    /usr/bin/html2text -o "$filename.txt" -nometa $file
+    counter=$[$counter +1]
+done
+
+echo "$counter files changed. DONE"

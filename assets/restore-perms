@@ -1,0 +1,70 @@
+#!/bin/bash
+#
+#  Restore file permisions to my prefered state
+
+# set all directories to accessible to all but write to owner only [755 rwx-rx-rx]:
+find . -type d -print -exec chmod 755 {} \;
+# set all FILES to executable to start with [755 rwx-rx-rx]:
+find . -type f -print -exec chmod 755 {} \;
+# Reset any other files known not to be executable to normal [664 rw-rw-r:
+find . -name "*.7z" -type f -print -exec chmod 664 {} \;
+find . -name "*.aes" -type f -print -exec chmod 664 {} \;
+find . -name "*.appinfo" -type f -print -exec chmod 664 {} \;
+find . -name "*.bz2" -type f -print -exec chmod 664 {} \;
+find . -name "*.c" -type f -print -exec chmod 664 {} \;
+find . -name "*.cab" -type f -print -exec chmod 664 {} \;
+find . -name "*.cat" -type f -print -exec chmod 664 {} \;
+find . -name "*.conf" -type f -print -exec chmod 664 {} \;
+find . -name "*.css" -type f -print -exec chmod 664 {} \;
+find . -name "*.db" -type f -print -exec chmod 664 {} \;
+find . -name "*.deb" -type f -print -exec chmod 664 {} \;
+find . -name "*.dll" -type f -print -exec chmod 664 {} \;
+find . -name "*.doc" -type f -print -exec chmod 664 {} \;
+find . -name "*.docx" -type f -print -exec chmod 664 {} \;
+find . -name "Doxyfile*" -type f -print -exec chmod 664 {} \;
+find . -name "*.gif" -type f -print -exec chmod 664 {} \;
+find . -name ".gitignore" -type f -print -exec chmod 664 {} \;
+find . -name "*.go" -type f -print -exec chmod 664 {} \;
+find . -name "*.go" -type f -print -exec chmod 664 {} \;
+find . -name "*.gz" -type f -print -exec chmod 664 {} \;
+find . -name "*.h" -type f -print -exec chmod 664 {} \;
+find . -name "*.htm" -type f -print -exec chmod 664 {} \;
+find . -name "*.html" -type f -print -exec chmod 664 {} \;
+find . -name "*.html" -type f -print -exec chmod 664 {} \;
+find . -name "*.icns" -type f -print -exec chmod 664 {} \;
+find . -name "*.ico" -type f -print -exec chmod 664 {} \;
+find . -name "*.inf" -type f -print -exec chmod 664 {} \;
+find . -name "*.info" -type f -print -exec chmod 664 {} \;
+find . -name "*.ini" -type f -print -exec chmod 664 {} \;
+find . -name "*.iso" -type f -print -exec chmod 664 {} \;
+find . -name "*.jpeg" -type f -print -exec chmod 664 {} \;
+find . -name "*.jpg" -type f -print -exec chmod 664 {} \;
+find . -name "*.lproj" -type f -print -exec chmod 664 {} \;
+find . -name "*.manifest" -type f -print -exec chmod 664 {} \;
+find . -name "*.md" -type f -print -exec chmod 664 {} \;
+find . -name "*.mp3" -type f -print -exec chmod 664 {} \;
+find . -name "*.mui" -type f -print -exec chmod 664 {} \;
+find . -name "*.nib" -type f -print -exec chmod 664 {} \;
+find . -name "*.pdf" -type f -print -exec chmod 664 {} \;
+find . -name "*.ppt" -type f -print -exec chmod 664 {} \;
+find . -name "*.psd" -type f -print -exec chmod 664 {} \;
+find . -name "*.rpm" -type f -print -exec chmod 664 {} \;
+find . -name "*.rtf" -type f -print -exec chmod 664 {} \;
+find . -name "*.strings" -type f -print -exec chmod 664 {} \;
+find . -name "*.sys" -type f -print -exec chmod 664 {} \;
+find . -name "*.tar" -type f -print -exec chmod 664 {} \;
+find . -name "*.toml" -type f -print -exec chmod 644 {} \;
+find . -name "*.tgz" -type f -print -exec chmod 664 {} \;
+find . -name "*.txt" -type f -print -exec chmod 664 {} \;
+find . -name "*.vb" -type f -print -exec chmod 664 {} \;
+find . -name "*.webarchive" -type f -print -exec chmod 664 {} \;
+find . -name "*.xls" -type f -print -exec chmod 664 {} \;
+find . -name "*.xml" -type f -print -exec chmod 664 {} \;
+find . -name "*.xmp" -type f -print -exec chmod 664 {} \;
+find . -name "*.zip" -type f -print -exec chmod 664 {} \;
+find . -name "LICENSE" -type f -print -exec chmod 664 {} \;
+find . -name "Makefile" -type f -print -exec chmod 664 {} \;
+find . -name "README" -type f -print -exec chmod 664 {} \;
+find . -name ".gitattributes" -type f -print -exec chmod 664 {} \;
+# set specific config files (-type f) contained in MoonStore 'config' directory
+find /home/simon/MoonStore/apps/linux/configs/ -type f -print -exec chmod 664 {} \;

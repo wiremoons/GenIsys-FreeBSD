@@ -1,0 +1,34 @@
+#!/bin/bash
+# script to run BitTorrent Sync daemon - if it is not already running
+# if it is running - kill it, and then restart
+#  created on 17th Feb 2014
+
+# ${TOOLDIR} is set in .bashrc
+
+# uncomment the correct location for this system config file@
+#BTSYNCONF=/home/simon/Dropbox/Apps/linux/configs/btsync-server.conf
+BTSYNCONF=/home/simon/Dropbox/Apps/linux/configs/btsync-blumoons.conf
+#BTSYNCONF=/home/simon/Dropbox/Apps/linux/configs/btsync-ultra.conf
+
+# Check required ~/.btsync directory exists
+if [ -d ~/.btsync ] ; then
+	# ok see if it is running aleady?
+	PID=$(pgrep btsync)
+	if [ "$?" -eq "0" ]; then
+	    echo "at least one instance of btsync found, killing all instances"
+	    kill $PID
+	    sleep 5
+	    echo "restarting btsync now"
+	    ${TOOLDIR}/btsync --config ${BTSYNCONF}
+	else
+	    echo "no running instances of btsync found, starting one"
+	    ${TOOLDIR}/btsync --config ${BTSYNCONF}
+	 fi
+else
+	echo "Create ~/.btsync directory first"
+	exit -1
+fi
+
+
+
+

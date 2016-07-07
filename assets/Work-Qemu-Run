@@ -1,0 +1,34 @@
+#!/bin/sh
+#
+# Used to start up a Qemu virtual machine
+#
+# Port forwards connections to the hosts system's port 5555
+# to the Windows client on port 3389 (ie Windows RDP)
+# to allow connection for management etc.
+# All other incoming connections are blocked to the client
+#
+export QEMU_AUDIO_DRV=alsa 
+DISKIMG=~/VMs/Qemu-Work-Win7/Win7Pro_Image-Work.dsk 
+#DISKIMG=~/VMs/Win7-Pro/Win7Pro_Image.dsk
+#WIN7IMG=~/VMs/Win7/Win7-32bit_Ultimate.iso
+#VIRTIMG=~/VMs/Win7/virtio-win-0.1-81.iso
+#
+#
+echo " "
+echo "*** Running Work Windows 7 KVM in Qemu - RDP version ***"
+echo " "
+echo "Use to connect:  rdesktop -a 32 -z -x l -f -u simon -f -r disk:share=/datastore localhost:5555"
+echo " "
+qemu-system-i386 --enable-kvm \
+-drive file=${DISKIMG},if=virtio \
+-m 3048 -nographic \
+-net nic,model=virtio -net user,hostfwd=tcp::5555-:3389 \
+-rtc base=localtime,clock=host -smp cores=2,threads=4 \
+-usbdevice tablet -soundhw ac97 -cpu host \
+-device virtio-serial-pci \
+-spice port=5930,disable-ticketing \
+-device virtserialport,chardev=spicechannel0,name=com.redhat.spice.0 \
+-chardev spicevmc,id=spicechannel0,name=vdagent
+echo "DONE - shutdown"
+echo " "
+

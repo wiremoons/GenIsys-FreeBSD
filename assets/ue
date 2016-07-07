@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+#
+#  Script to run UltaEdit from the command line
+#
+if [ -x /usr/bin/uex ] ; then
+	# run UltraEdit passing all command line 
+	# parameters and redirect any output to /dev/null
+	# as UltrEdit often prints out lots of Gdk warnings. 
+	# Also background process to free the
+	# console / terminal for further use
+	/usr/bin/uex ${*} > /dev/null 2>&1 &
+else
+	echo "ERROR: unbale to locate or run: /usr/bin/uex"
+fi
+

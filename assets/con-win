@@ -1,0 +1,14 @@
+#!/bin/bash
+#
+#  Connect to Windows 7 runnning on Qemu KVM with Remote Desktop (RDP)
+#   - make sure 'Remote connections' are enabled in Windows first
+#
+# command lines settings are:
+#
+#           -a 32                     == 32bit colour display
+#           -z                        == compress data transfered to connection
+#           -x l                      == use lan qaulity connection speeds
+#           -f                        == open in full screen (use Ctrl+Alt+Enter to shrink)
+#           -r disk:share/datastore   == share the directory /datastore with vm from host system 
+#
+rdesktop -a 32 -z -x l -f -u simon -f -r disk:share=/datastore localhost:5555 &

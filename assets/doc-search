@@ -1,0 +1,12 @@
+#!/bin/sh
+# script to search text documents for a provided string
+#
+#  chnage below to where the Sybil Library is kept on your computer:
+LIBLOC=/home/simon/Sybil
+#
+#   NOTE:  add ability to find egrep in either /bin/egrep (Linux) or /usr/bin/egrep (Mac).  Also /home/simon vs /Users/simon
+echo ""
+echo "Begining Search for $1...."
+echo ""
+/bin/egrep -R -l -i "$1" $LIBLOC
+echo "DONE"

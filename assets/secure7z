@@ -1,0 +1,42 @@
+#!/bin/bash
+# script to compress and encrypt the provide folder
+# 
+# Change History
+#   - added test to check for correct command line usage (03 Jul 2016)
+#
+# Flags for 7zip used below:    
+# -p      : prompt for password
+# -mx9    : use maximum compression
+# -mmt=4  : specifiy use four threads
+# -t7z    : use 7z format
+# -mhe=on : encrypt headers also - hides archive filenames
+# -mhc=on : turn on header compression
+# -ssc    : case sensitive mode for files
+# -w/tmp  : specify a working direcorty (on SSD)
+# -m0=lzma2 : use lzma2 method which is multi threaded
+#
+printf "\t\tCompress Securely Files and Folders\n"
+printf "\t\t-----------------------------------\n\n\n"
+#
+# check that 7zip is installed on the computer
+#
+if [ ! $(command -v 7z) ] ; then
+    printf "ERROR: Unable to find the '7z' program - is it installed and in your \$PATH ?\n\n"
+    exit
+fi
+#
+# check the command line args have been provided before running 7zip
+#
+if [ -z "$1" ] || [ -z "$2" ] ; then
+    printf "ERROR: provide the names of the files to compress securely, and the new archive file name\n"
+    printf "Run as:  secure7z  <archive_file_name> <files_to_compress_&_encrypt>\n\n"
+    exit
+fi
+#
+# start the file encryption and compresion
+#
+echo ""
+echo "Beginning 7z Compression and Encryption for $1...."
+echo ""
+/usr/bin/7z a "$1" "$2" -t7z -p -mhe=on -mhc=on -mx9 -m0=lzma2 -mmt=8 -ssc -w/tmp
+echo "DONE"

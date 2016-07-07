@@ -1,0 +1,20 @@
+#!/bin/bash
+#
+#  Script to sync the Primary ~/MoonStore to the back up /Volumes/DATA-STORE/MoonStore
+#
+echo ""
+echo "Begining sync of ~/MoonStore to /Volumes/DATA-STORE/MoonStore/"
+echo ""
+if mount | grep /red1tb > /dev/null ; then 
+    echo "    Found mounted USB3 drive on /red1tb"
+    echo "    Will mirror all of /datastore to /red1tb....."
+    echo ""
+    sudo rsync -PhaWL --delete --exclude ".stversions" /datastore/ /red1tb/    
+    echo "DONE"
+ else
+    echo "ERROR: no /red1tb mounted drive found"
+    exit 1
+ fi
+
+
+

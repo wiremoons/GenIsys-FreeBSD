@@ -1,0 +1,26 @@
+#!/bin/bash
+#
+#  Connect to Windows 7 runnning on server (work vm)  with Remote Desktop (RDP)
+#   - make sure 'Remote connections' are enabled in Windows first
+#
+# command lines settings are:
+#
+#           -a 32                     == 32bit colour display (also available 8,16,24)
+#           -z                        == compress data transfered to connection
+#           -x l                      == use lan qaulity connection speeds
+#           -f                        == open in full screen (use Ctrl+Alt+Enter to shrink)
+#           -g 76%                    == sets the windows geomtry to 80% (instead of full screen)
+#           -g WxH                    == set actual width and hight in pixels (alternative to above)
+#           -r disk:share/datastore   == share the directory /datastore with vm from host system 
+#           -x 0x80                   == use cleartype fonts for LAN access
+#           -r sound:local            == play any sounds locally (nb: may see 'Fooo!' output)
+#           -k en-gb                  == use UK English keyboard map
+#           -r clipboard:PRIMARYCLIPBOARD == configure clipboard
+#
+echo "Waking up computer...  plese wait"
+wakeonlan 00:24:e8:19:de:d1
+sleep 4
+echo "Ateempting connection now..."
+rdesktop -a 24 -g 1700x1180 -z -x l -r clipboard:PRIMARYCLIPBOARD -k en-gb -u simon -r sound:local -r disk:DStore=/datastore -r disk:MStore=/home/simon/MoonStore -x 0x80 10.0.10.15 
+#2> /dev/null &
+echo "done"

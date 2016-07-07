@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# script to compress and encrypt the ~/MoonStore directory and files
+#
+#  Updated 31 Oct 2015 by Simon Rowe - added check for 7z executable
+#  Updated 04 Jan 2014 by Simon Rowe - added check for 7z exit code 
+#  Updated 17 Jul 2014 by Simon Rowe - converted to backup MoonStore
+#
+printf "\n"
+printf "Checking for directory ~/MoonStore ...\n"
+printf "\n"
+if [ -d ~/MoonStore ] ; then
+    cd ~/
+else
+    printf "ERROR: unble to find: ~/MoonStore\nABORTED\n"
+    exit 2
+fi
+printf "Changed to: %s\n" "$(pwd)"
+export STBKFILE=MoonStore-$(date -d "today" +"%Y-%m-%d_%H.%M").7z
+printf "\n"
+printf "Checking for 7zip application... "
+if [[ ! -x /usr/bin/7z ]] ; then
+		printf "ERROR: install 7z on you computer first\nABORT\n"
+		exit 8
+else
+		printf "Begining 7z Compression and Encryption for %s...." "$STBKFILE\n"
+fi
+# run the password protected and encrypted archive using 7z
+# NB: user will be prpompted for a password to use for encryption
+/usr/bin/7z a $STBKFILE ./MoonStore -p -mhe -mx9 -xr\!.stversions
+# check 7z ran ok
+if [ $? -ne 0 ]; then
+    printf "ERROR: 7z Compression failed!\nABORT\n"
+    exit 4
+else
+    printf "DONE 7z COMPRESSION !!\n"
+fi
+printf "Moving %s to /datastore/backups/...\n" "$STBKFILE"
+if [ -f $STBKFILE ] && [ -d /datastore/SyncData/BackUps/ ] ; then
+  mv $STBKFILE /datastore/SyncData/BackUps/
+else
+    printf "ERROR: unable to mv $STBKFILE to /datastore/SyncData/BackUps/\n"
+    exit 3
+fi
+printf "ALL IS WELL\n"
+
