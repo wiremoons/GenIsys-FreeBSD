@@ -1,0 +1,6 @@
+# stop screen blanking - alternative:  xset s off   use: xset q to view currrent settings
+xset s noblank
+# set keyboard to uk
+setxkbmap -layout gb
+# start mate desktop environment
+exec mate-session

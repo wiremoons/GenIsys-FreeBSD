@@ -1,0 +1,86 @@
+" VIM editor config file - Simon Rowe
+"
+" set the name of the Vim colour scheme to use by default
+colorscheme blue 
+" make sure that bottom status bar is running and displayed
+set ruler
+set laststatus=2
+" ensure syntax highlighting is turned on
+syntax on
+" don't make noise
+set noerrorbells
+" add a cursor line to show our position in the file
+set cursorline
+" set the colour of the cursor line - override colour scheme in use
+":hi CursorLine   cterm=NONE ctermbg=lightyellow ctermfg=black guibg=darkred guifg=white
+" Remove the Toolbar in the Gui Vim
+"set guioptions-=T
+" Turn on search as you type option
+set incsearch
+" Turn on line numbering
+set number
+" when in normal mode - dont blink the cursor
+set gcr=n:blinkon0
+" set search options highlight search - hls / show current match pattern as searching=is / 
+"     ignore case=ic / override ic if you enter upper and lower case letter yourself
+set hls is ic scs
+" Turn on spell checking for your document and make sure language used is English
+set spell
+set spelllang=en
+" Limit the number of spelling suggestions for correct to 10
+set spellsuggest=10
+" State the location of the spell file that you want your own words added stored in
+set spellfile=~/.spellfile.add
+" Keep cursor in the middle of the window/screen and scroll around it
+set scrolloff=1000
+" Use the OS clipboard instead of just the vim clipboards
+set clipboard=unnamed
+" set up tabs to use four spaces and work smartly with braces
+set smartindent
+set tabstop=4
+set shiftwidth=4
+set expandtab
+" Pathogen Support Loading for package management and bundle support
+"  - see batch files:  setup-home  for install support
+execute pathogen#infect()
+"
+" GO LANGUAGE SUPPORT SECTION
+"
+" add in Go language support - assumes Go is installed and GOROOT env variable is defined:
+set rtp+=$GOROOT/misc/vim
+filetype plugin indent on
+syntax on
+" on .go file save - run golanf fmt command
+autocmd FileType go autocmd BufWritePre <buffer> Fmt
+" add indenting on
+filetype indent on
+" add Go file type plugin
+filetype plugin on
+" add in Go compiler support
+autocmd FileType go compiler go
+" add in Go compiler support - active with ":compiler go"
+autocmd FileType go compiler go
+"
+"
+" the following are Vim abbreviations
+iabbr Snr Senior
+iabbr NIWS NWIS
+iabbr suport support
+iabbr Cache Cach\*'e
+iabbr £ \[Po]
+iabbr chnage change
+iabbr ISC InterSystems
+iabbr ..' .IP \(bu
+iabbr ..- .IP \(hy
+"
+" the following are key modifiers
+"
+" some key mappings for Groff:
+"imap <F12> .IP \(bu<cr>
+"imap <F11> .IP \(hy<cr>
+"imap <F1> \fB\fP<Left><Left><Left>
+"imap <F2> \fI\fP<Left><Left><Left>
+"imap <F3> \*{\*}<Left><Left><Left>
+"nmap <F5> :!groff -t -p -ms %:p | pstopdf -i -o %:p.pdf<CR>
+" General key mappings:
+syntax on
