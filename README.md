@@ -14,7 +14,7 @@ The script needs to be run as root, and performs the following actions:
 
 1. Snapshots the ZFS (can be bypassed);
 2. Updates the binary packagment tools;
-3. Install the following packages: `mksh` `nano` `avahi nss_mdns` `git` `curl` `rsync` `screen` `cmdwatch` `vim` `mp4v2` `tree` `pv` `beadm` `aspell` `en-aspell` `p7zip`;
+3. Install the following packages: `mksh` `nano` `avahi nss_mdns` `git` `rsync` `screen` `cmdwatch` `vim` `mp4v2` `tree` `pv` `beadm` `aspell` `en-aspell` `p7zip`;
 4. Offers to install Nvidia drivers, Lumina window manager, Chromium, vlc, and Xorg
 5. Update system configuration files such as: `rc.conf`, `loader.conf`, and `sysctl.conf`
 6. Clone this Git repo to allow further setup using the script: `setup-home` to be run by the user account after a reboot
@@ -25,18 +25,20 @@ The script needs to be run as root, and performs the following actions:
 The basic process I use with this repo is oputlined below. This would be done following a successful install of FreeBSD 10.3, and after the system has been rebooted following the install. Login to your user account and follow the process below. The high-level process steps are:
 
 1. login to your normal user account
-2. download the setup script using curl
+2. download the setup script using `fetch`
 3. switch to root user
 4. run the script to setup and configure the system
 5. restart the system
 6. login as your normal user account
-7. Use the now cloned Git repo to setup the other files for the account usng the `setup-home` script. 
+7. Use the now cloned Git repo to setup the other files for the account usng the `setup-home` script.
 
 The actual commands to obtain and run the the initial script on the freshly installed FreeBSD 10.3 system would be:
 
 ```
-curl -sL https://goo.gl/sw6oMt -o Install-FreeBSD-10.3
-su
+su -
+mkdir scratch && cd scratch
+fetch https://goo.gl/sw6oMt -o Install-FreeBSD-10.3
+chmod 755 ./Install-FreeBSD-10.3
 sh ./Install-FreeBSD-10.3
 shutdown -r now
 ```
