@@ -26,7 +26,8 @@
 # TERM=xterm; 	export TERM
 #
 # Set $EDITOR to either vi or Emacs
-EDITOR=emacs;  	export EDITOR
+#EDITOR=emacs;  	export EDITOR
+EDITOR=vim;  		export EDITOR
 # set $PAGER to either more or less
 PAGER=more;  	export PAGER
 #
@@ -53,8 +54,9 @@ HISTSIZE=5000
 set -U
 # add trailing '/' to directory names
 set -X
-# use Emacs mode
-set -o emacs
+# use Emacs or vi mode
+#set -o emacs
+set -o vi
 # make a login shell
 #set -l
 # set variable identifying the chroot you work in (used in the prompt below)
@@ -88,12 +90,12 @@ else
 fi
 
 #-----------------------------------------------------------------------------
-#    SETUP env variable $TOOLDIR to point to local scripts held in MoonStore
+#    SETUP env variable $TOOLDIR to point to local scripts held in GenIsys-FreeBSD
 #-----------------------------------------------------------------------------
 # Create ${TOOLDIR} env variable to store location for bin & scripts folder 
 # - only if it exists
-if [ -d /home/simon/MoonStore/apps/freebsd/bin ] ; then
-  TOOLDIR=/home/simon/MoonStore/apps/freebsd/bin
+if [ -d /home/simon/GenIsys-FreeBSD/assets ] ; then
+  TOOLDIR=/home/simon/GenIsys-FreeBSD/assets
 fi
 export TOOLDIR
 
@@ -101,8 +103,8 @@ export TOOLDIR
 #    SETUP $PATH to include local apps and scripts held in MoonStore
 #-----------------------------------------------------------------------------
 # update PATH to include MoonStore Unix bin & scripts folder if it exists
-if [ -d ~/MoonStore/apps/freebsd/bin ] ; then
-  PATH=~/MoonStore/apps/freebsd/bin:"${PATH}"
+if [ -d ~/GenIsys-FreeBSD/assets ] ; then
+  PATH=~/GenIsys-FreeBSD/assets:"${PATH}"
 fi
 export PATH
 
@@ -146,11 +148,6 @@ if [ -d /datastore/Work/Scratch/Sybil ] ; then
   ACRODB=/datastore/Work/Scratch/Sybil/Sybil.db
 fi
 export ACRODB
-
-#-----------------------------------------------------------------------------
-#    SETUP SKYPE - improves jitter and speak quality
-#-----------------------------------------------------------------------------
-export PULSE_LATENCY_MSEC=60
 
 #-----------------------------------------------------------------------------
 #    SETUP Unison - for file synchronisation and copying
@@ -217,6 +214,8 @@ fi
 #-----------------------------------------------------------------------------
 #    SETUP aliases
 #-----------------------------------------------------------------------------
+#
+#  move and source from:  ~/.mksh_aliases ??
 #
 # Set some useful aliases below
 #
