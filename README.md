@@ -37,7 +37,7 @@ The actual commands to obtain and run the the initial script on the freshly inst
 ```
 su -
 mkdir scratch && cd scratch
-fetch https://goo.gl/sw6oMt -o Install-FreeBSD-10.3
+fetch --no-verify-peer https://goo.gl/sw6oMt -o Install-FreeBSD-10.3
 chmod 755 ./Install-FreeBSD-10.3
 sh ./Install-FreeBSD-10.3
 shutdown -r now
