@@ -1,18 +1,17 @@
 " VIM editor config file - Simon Rowe
 "
+" Once changes have been made using Vim to edit this file - reload with:  ':so %'
+"
 " set the name of the Vim colour scheme to use by default
-colorscheme blue 
-" make sure that bottom status bar is running and displayed
+" colorscheme blue 
+" make sure that bottom status bar is running and displayed and set display
+" colours for GUI And terminal versions
 set ruler
 set laststatus=2
-" ensure syntax highlighting is turned on
-syntax on
 " don't make noise
 set noerrorbells
 " add a cursor line to show our position in the file
 set cursorline
-" set the colour of the cursor line - override colour scheme in use
-":hi CursorLine   cterm=NONE ctermbg=lightyellow ctermfg=black guibg=darkred guifg=white
 " Remove the Toolbar in the Gui Vim
 "set guioptions-=T
 " Turn on search as you type option
@@ -24,6 +23,8 @@ set gcr=n:blinkon0
 " set search options highlight search - hls / show current match pattern as searching=is / 
 "     ignore case=ic / override ic if you enter upper and lower case letter yourself
 set hls is ic scs
+" turn off highlighted search results with double escape key press
+nnoremap <silent> <Esc><Esc> :let @/=""<CR>
 " Turn on spell checking for your document and make sure language used is English
 set spell
 set spelllang=en
@@ -43,24 +44,62 @@ set expandtab
 " Pathogen Support Loading for package management and bundle support
 "  - see batch files:  setup-home  for install support
 execute pathogen#infect()
-"
-" GO LANGUAGE SUPPORT SECTION
-"
-" add in Go language support - assumes Go is installed and GOROOT env variable is defined:
-set rtp+=$GOROOT/misc/vim
 filetype plugin indent on
-syntax on
-" on .go file save - run golanf fmt command
-autocmd FileType go autocmd BufWritePre <buffer> Fmt
-" add indenting on
-filetype indent on
-" add Go file type plugin
-filetype plugin on
-" add in Go compiler support
-autocmd FileType go compiler go
-" add in Go compiler support - active with ":compiler go"
-autocmd FileType go compiler go
 "
+" SETUP SYNTASTIC CONFIG
+"
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list = 1
+" check files on open and save enabled
+let g:syntastic_check_on_open = 1
+" check files on save and quit disabled
+let g:syntastic_check_on_wq = 0
+" set the checker to use and their order
+let g:syntastic_c_checkers=['make','gcc','sparse']
+" provide command line args to sparse linter
+let g:syntastic_c_sparse_args = "-Wno-decl"
+" provide support for go-vim
+let g:syntastic_go_checkers = ['golint', 'govet', 'errcheck']
+let g:syntastic_mode_map = { 'mode': 'active', 'passive_filetypes': ['go'] }
+let g:go_list_type = "quickfix"
+"
+" SETUP CSCOPE 
+"
+" use both cscope and ctag for 'ctrl-]', ':ta', and 'vim -t'
+set cscopetag
+" check cscope for definition of a symbol before checking ctags: set to 1
+" if you want the reverse search order.
+set csto=0
+" add any cscope database in current directory
+if filereadable("cscope.out")
+    cs add cscope.out  
+    " else add the database pointed to by environment variable 
+    elseif $CSCOPE_DB != ""
+    cs add $CSCOPE_DB
+endif
+
+" show msg when any other cscope db added
+set cscopeverbose 
+
+if has('cscope')
+  set cscopetag cscopeverbose
+
+  if has('quickfix')
+    set cscopequickfix=s-,c-,d-,i-,t-,e-
+  endif
+
+  cnoreabbrev csa cs add
+  cnoreabbrev csf cs find
+  cnoreabbrev csk cs kill
+  cnoreabbrev csr cs reset
+  cnoreabbrev css cs show
+  cnoreabbrev csh cs help
+
+"  command -nargs=0 Cscope cs add $VIMSRC/src/cscope.out $VIMSRC/src
+endif
 "
 " the following are Vim abbreviations
 iabbr Snr Senior
@@ -69,6 +108,7 @@ iabbr suport support
 iabbr Cache Cach\*'e
 iabbr £ \[Po]
 iabbr chnage change
+iabbr chnages changes
 iabbr ISC InterSystems
 iabbr ..' .IP \(bu
 iabbr ..- .IP \(hy
@@ -82,5 +122,15 @@ iabbr ..- .IP \(hy
 "imap <F2> \fI\fP<Left><Left><Left>
 "imap <F3> \*{\*}<Left><Left><Left>
 "nmap <F5> :!groff -t -p -ms %:p | pstopdf -i -o %:p.pdf<CR>
-" General key mappings:
+" map Nerdtree to open with Ctrl+n keyboard shortcut
+"map <C-n> :NERDTreeToggle<CR>
+"
+" Ensure syntax highlighting is turned on
 syntax on
+"
+" Add some useful commands
+"  - note '!' after command forces it to replace any existing commands with
+"  the same name
+"
+" To use ':Bd' to close current buffer but keep window open
+command! Bd bp\|bd \#

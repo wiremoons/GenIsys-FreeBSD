@@ -1,4 +1,4 @@
-personal_ws-1.1 en 121 
+personal_ws-1.1 en 125 
 API
 Morral
 GxP
@@ -10,6 +10,7 @@ startup
 CamelCase
 ISC
 analytics
+QoS
 eg
 Bocam
 Solaris
@@ -20,7 +21,6 @@ ServicePoint
 UltraEdit
 Sukumaran
 nano
-Nano
 uncomment
 ie
 nCurses
@@ -55,6 +55,9 @@ gcc
 NewBSD
 Porthkerry
 process
+Corfield
+Glamorgan
+PSBA
 course
 Maguire
 organise
@@ -104,6 +107,7 @@ stylesheet
 unindent
 rgrep
 customisations
+Multicast
 WPH
 BCU
 blog

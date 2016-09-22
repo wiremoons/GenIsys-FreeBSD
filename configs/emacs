@@ -9,10 +9,14 @@
 ;;    Updated on 21 Jan 2015 - added c language support, yasnippit, auto-complete
 ;;    Updated on 09 Jan 2016 - added text mode improvements for bullet handling
 ;;    Updated on 03 Jun 2016 - added CUA mode setting
+;;	  Updated on 11 Sep 2016 - removed marmalade repo (cert error) added follow symlink command
+;;	  Updated on 11 Sep 2016 - added auto install of Emacs packages
+;;	  Updated on 18 Sep 2016 - added auto install of multi-cursor package and key bindings
 ;;
 ;;  NB:  you can reload this file once editied with:
 ;;     M-x load-file RET RET
-;;  
+;;  To find bracket issues run:   
+;;     M-x check-parens
 ;;
 ;; Load a colour scheme
 ;;(load-theme 'tsdh-dark)
@@ -27,13 +31,16 @@
 ;;(typopunct-change-language 'english t)
 ;;
 ;; set font face and font size
-(set-face-font 'default "Consolas-12")
+(set-face-font 'default "Consolas-13")
 ;;
-;; set emacs to use CUA mode
-(cua-mode t)
-(setq cua-auto-tabify-rectangles nil) ;; Don't tabify after rectangle commands
-(transient-mark-mode 1) ;; No region when it is not highlighted
-(setq cua-keep-region-after-copy t) ;; Standard Windows behaviour
+;; set emacs to use CUA mode (disabled: 11 Sep 2016)
+;;(cua-mode t)
+;;(setq cua-auto-tabify-rectangles nil) ;; Don't tabify after rectangle commands
+;;(transient-mark-mode 1) ;; No region when it is not highlighted
+;;(setq cua-keep-region-after-copy t) ;; Standard Windows behaviour
+;;
+;; Emacs should follow symlinks and edit actual linked file
+(setq vc-follow-symlinks t)
 ;;
 ;; Add the characters - + or * as bullet points in text so they are recognised as
 ;; paragraph boundaries also, and therefore M-q respects their formating.
@@ -46,7 +53,7 @@
 (setq sentence-end-double-space nil)
 ;;
 ;; tell Emacs to use Aspell instead of default ispell
-;; make sure it is installed with: sudo pacman -S aspell aspell-en
+;; make sure it is installed - add packages: aspell aspell-en
 (setq-default ispell-program-name "aspell")
 ;;
 ;; spell check as you type using `flyspell-mode'
@@ -57,6 +64,67 @@
       (add-hook hook (lambda () (flyspell-mode 1))))
 (dolist (hook '(change-log-mode-hook log-edit-mode-hook))
       (add-hook hook (lambda () (flyspell-mode -1))))
+;; run flyspell on current file buffer to find all spelling errors
+(global-set-key (kbd "C-c s") 'flyspell-buffer)
+;; flyspell next highlighted word that is a spelling error
+(global-set-key (kbd "C-c w") 'flyspell-goto-next-error)
+;;
+;; EMACS PACKAGING
+;;
+;; load the package management
+(require 'package)
+;; To prevent initialising twice - run below first
+(setq package-enable-at-startup nil)   
+;; Add addtional repositories for package management
+(setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
+                         ("melpa" . "http://melpa.milkbox.net/packages/")))
+;; ensures the installed packages in ~/.emacs.d/elpa/ are all loaded for Emacs
+(package-initialize)
+;;
+;; auto-load any packages we are missing
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+(eval-when-compile (require 'use-package))
+;;
+;; List packages to obtain and install if needed below
+;;
+;; Go language support
+(use-package go-mode
+  :ensure t)
+(use-package go-autocomplete
+  :ensure t)
+;;
+;; powershell script editing support
+(use-package powershell
+  :ensure t)
+;;
+;; auto complete and support for c
+(use-package auto-complete
+  :ensure t)
+(use-package auto-complete-c-headers
+  :ensure t)
+;;
+;;
+(use-package yasnippet
+  :ensure t)
+;;
+;; 
+(use-package iedit
+  :ensure t)
+;;
+;;
+(use-package flycheck
+  :ensure t)
+;;
+;;
+(use-package flymake-go
+  :ensure t)
+
+;;
+;; Mulitple-cursor package: https://github.com/magnars/multiple-cursors.el
+(use-package multiple-cursors
+  :ensure t)
 ;;
 ;; enable abbrev mode and specify the file to keep, and save on exit
 (setq-default abbrev-mode t)
@@ -69,11 +137,14 @@
 ;; don't make pesky backup files
 (setq make-backup-files nil)
 ;;
-;; add key bindings
+;; ADD KEY BINDINGS
+;;
 ;; used to insert text into defined rectangle:
 (global-set-key (kbd "C-x r i") 'string-insert-rectangle)
 ;; bind key to start iedit mode - as is broken by default
 (define-key global-map (kbd "C-c ;") 'iedit-mode)
+;;
+;; TAB MANAGEMENT AND SETTINGS
 ;;
 ;; dont insert tabs - use spaces instead
 (setq-default indent-tabs-mode nil)
@@ -94,24 +165,15 @@
 (setq next-line-add-newlines nil)
 ;; show line numbers in files and add space between number and file's text / content
 (global-linum-mode t)
-(setq linum-format "%d ")
+(setq linum-format "%d  ")
 ;; Open unidentified files in text mode - as the default
 (setq default-major-mode 'text-mode)
 ;; Always prefer UTF-8 support
 (prefer-coding-system 'utf-8)
+
 ;;
-;; Emacs Packaging
-;; load the package management
-(require 'package)
-;; Add addtional repositories for package management
-(setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
-                         ("marmalade" . "https://marmalade-repo.org/packages/")
-                         ("melpa" . "http://melpa.milkbox.net/packages/")))
-;; ensures the installed packages in ~/.emacs.d/elpa/ are all loaded for Emacs
-(package-initialize)
-;;
-;; c Source Code
-;; setup for c source code
+;; C Source Code
+;; Setup for c source code
 ;;
 ;; make sure c mode is enabled for .h .c or .cpp files
 (require 'cc-mode)
@@ -121,34 +183,79 @@
 (setq-default tab-width 4 indent-tabs-mode t)
 ;; auto indent code when return is pressed 
 (define-key c-mode-base-map (kbd "RET") 'newline-and-indent)
+;;
 ;; turn on automatic bracket insertion by pairs. New in Emacs 24
 (electric-pair-mode 1)
-;; enable auto-complete for source code file - below is generic for all languages
+;;
+;; enable auto-complete for source code files - below is generic for all languages
 (require 'auto-complete)
 (require 'auto-complete-config)
 (ac-config-default)
+;;
 ;; add yasnippet support for all languages, and enable it
 (require 'yasnippet)
 (yas-global-mode 1)
+;;
 ;; define a function to load auto-complete-c-header called on c hooks being started
 (defun my:ac-c-header-init ()
   (require 'auto-complete-c-headers)
   (add-to-list 'ac-sources 'ac-source-c-headers))
 (add-hook 'c-mode-hook 'my:ac-c-header-init)
+;;
 ;; enable flymake for syntax checking - require below in your Makefile:
 ;; check-syntax:
 ;;     gcc -o nul -S ${CHK_SOURCES}
 ;; to use `M-x flymake` or add "(add-hook 'find-file-hook 'flymake-find-file-hook)"
 (require 'flymake)
 ;;
+;; enable and configure key for multiple-cursor support
+(require 'multiple-cursors)
+;; add a cursor to each line when an active region that spans multiple lines
+;;(global-set-key "\C-c \C-c" 'mc/edit-lines)
+;;add multiple cursors not based on continuous lines, but based on keywords in the buffer
+(global-set-key (kbd "C-c d") 'mc/mark-next-like-this)
+;;(global-set-key "\C-<" 'mc/mark-previous-like-this)
+(global-set-key (kbd "C-c a") 'mc/mark-all-like-this)
+;;
 ;; GO LANG
 ;; provide support for Go language: M-x list-packages 
-;;(require 'go-mode-load)
-(add-hook 'go-mode-hook (lambda ()
-                          'before-save-hook 'gofmt-before-save))
-(add-hook 'go-mode-hook (lambda ()
-          (local-set-key (kbd "C-c C-r") 'go-remove-unused-imports)))
-(if (not (string-match "go" compile-command))
+(defun my-go-mode-hook ()
+  ; Call Gofmt before saving
+  (add-hook 'before-save-hook 'gofmt-before-save)
+  ; Customize compile command to run go build
+  (if (not (string-match "go" compile-command))
       (set (make-local-variable 'compile-command)
            "go build -v && go test -v && go vet"))
+  ; Godef jump key binding
+  (local-set-key (kbd "M-.") 'godef-jump))
+(add-hook 'go-mode-hook 'my-go-mode-hook)
+;;
+;; bind a global key to run: M-x compile
+(global-set-key "\C-x\C-m" 'compile)
 
+;;
+;; Git support
+;; Add packages to support Git use below:
+
+
+;;
+;; Turn off audio and visual bell as they are annoying...
+(setq ring-bell-function 'ignore)
+
+;;
+;; AUTO ADDED INFORMATION BELOW
+;;
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   (quote
+	(flymake-go flycheck iedit yasnippet auto-complete-c-headers auto-complete powershell go-mode use-package))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
